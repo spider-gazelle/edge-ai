@@ -1,0 +1,32 @@
+name: edge-ai
+version: 1.0.0
+
+dependencies:
+  # The server framework
+  action-controller:
+    github: spider-gazelle/action-controller
+    version: ~> 7.0
+
+  # AI processing
+  tflite_pipeline:
+    github: spider-gazelle/tflite_pipeline
+    branch: master
+
+  # Configuration file change monitoring
+  inotify:
+    github: petoem/inotify.cr
+    branch: master
+
+development_dependencies:
+  ameba:
+    github: veelenga/ameba
+  hot_topic:
+    github: jgaskins/hot_topic
+
+# compile target
+targets:
+  interface:
+    main: src/interface.cr
+
+  processor:
+    main: src/processor.cr
