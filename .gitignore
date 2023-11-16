@@ -7,3 +7,4 @@ app
 bin
 .DS_Store
 *.so
+detections/*.sock

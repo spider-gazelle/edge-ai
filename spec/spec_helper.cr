@@ -26,19 +26,19 @@ INDEX0_CONFIG = JSON.parse(%({
   "output": [{
     "type": "object_detection",
     "model_uri": "https://storage.googleapis.com/tfhub-lite-models/tensorflow/lite-model/efficientdet/lite2/detection/metadata/1.tflite",
-    "scaling_mode": "cover", "gpu_delegate":false,"pipeline":[],"warnings":[]
+    "scaling_mode": "cover", "gpu_delegate":false,"warnings":[],"pipeline":[]
   },{
     "type": "face_detection",
     "model_uri": "https://raw.githubusercontent.com/patlevin/face-detection-tflite/main/fdlite/data/face_detection_back.tflite",
     "scaling_mode": "cover",
     "gpu_delegate":false,
     "strides": [16, 32, 32, 32],
-    "pipeline":[],
-    "warnings":[]
+    "warnings":[],
+    "pipeline":[]
   },{
     "type": "pose_detection",
     "model_uri": "https://storage.googleapis.com/tfhub-lite-models/google/lite-model/movenet/singlepose/lightning/tflite/int8/4.tflite",
-    "scaling_mode": "cover", "gpu_delegate":false,"pipeline":[],"warnings":[]
+    "scaling_mode": "cover", "gpu_delegate":false,"warnings":[],"pipeline":[]
   }]
 })).to_json
 
