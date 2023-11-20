@@ -18,7 +18,7 @@ shards:
 
   ffmpeg:
     git: https://github.com/spider-gazelle/ffmpeg.git
-    version: 1.1.0+git.commit.f4ea0fe94eb2c2c44d7ef8e003b0a46f337bcdb5
+    version: 1.1.0+git.commit.835b3369c52e73df6df7920d6bcb472f8159de3c
 
   habitat:
     git: https://github.com/luckyframework/habitat.git
@@ -74,7 +74,7 @@ shards:
 
   tflite_pipeline:
     git: https://github.com/spider-gazelle/tflite_pipeline.git
-    version: 1.0.0+git.commit.4ca21dbc37d166e45eb3e2d0a8fa8286a0b66dca
+    version: 1.0.0+git.commit.f1805ef3b7c8a0228ff4ec36aeaaf4c2255babc0
 
   v4l2:
     git: https://github.com/spider-gazelle/v4l2.cr.git

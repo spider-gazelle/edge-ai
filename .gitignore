@@ -8,3 +8,4 @@ bin
 .DS_Store
 *.so
 detections/*.sock
+model_storage/*.tflite

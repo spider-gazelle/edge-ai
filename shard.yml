@@ -30,3 +30,6 @@ targets:
 
   processor:
     main: src/processor.cr
+
+  info:
+    main: src/video_info.cr

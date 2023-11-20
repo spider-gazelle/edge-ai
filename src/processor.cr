@@ -99,6 +99,7 @@ class EdgeAI::Processor
     coord.on_output do |_, detections|
       signal.send(detections.to_json)
     end
+    spawn { coord.run_pipeline }
   end
 
   def shutdown
