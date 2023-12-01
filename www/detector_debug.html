@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<head>
+  <meta name="color-scheme" content="dark">
+  <style>
+      body{
+          margin: 0;
+      }
+  </style>
+</head>
+<body>
+  <script>
+      window.onload = function () {
+          const url = new URL(window.location.href);
+          const params = new URLSearchParams(url.search);
+          let id_value = params.get('id');
+
+          if (id_value) {
+              id_value = decodeURIComponent(id_value);
+              console.log('Connecting to detections from id: ' + id_value);
+          } else {
+              throw 'ID parameter is not present in the URL';
+          }
+
+          let socketURL = window.location.origin.replace('http', 'ws') + '/api/edge/ai/monitor/detections/' + id_value;
+          let ws = new WebSocket(socketURL);
+
+          // Connection opened
+          ws.addEventListener('open', function (event) {
+            console.log('WS Established...');
+          });
+
+          ws.addEventListener('close', function (event) {
+            console.log('WS Lost...');
+          });
+
+          ws.addEventListener('message', function (event) {
+            console.log('detections ', event.data);
+          });
+      }
+  </script>
+</body>
