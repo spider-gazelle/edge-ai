@@ -28,8 +28,8 @@ class EdgeAI::Configuration < EdgeAI::Base
   # add a new video pipeline
   @[AC::Route::POST("/config", body: :pipeline, status_code: HTTP::Status::CREATED)]
   def create(pipeline : Pipeline) : Pipeline
-    save_config do
-      id = UUID.random.to_s
+    id = UUID.random.to_s
+    save_config(id) do
       pipeline.id = id
       PIPELINES[id] = pipeline
     end
@@ -52,7 +52,7 @@ class EdgeAI::Configuration < EdgeAI::Base
     id : String,
     pipeline : Pipeline
   ) : Pipeline
-    save_config do
+    save_config(id) do
       existing = PIPELINES[id]?
       raise AC::Error::NotFound.new("index #{id} does not exist") unless existing
 
@@ -68,14 +68,22 @@ class EdgeAI::Configuration < EdgeAI::Base
     @[AC::Param::Info(description: "the id of the video stream", example: "ba714f86-cac6-42c7-8956-bcf5105e1b81")]
     id : String
   ) : Nil
-    save_config { PIPELINES.delete id }
+    save_config(id) { PIPELINES.delete id }
   end
 
-  protected def save_config(&)
+  protected def save_config(id : String, &)
     PIPELINE_MUTEX.synchronize do
       yield
       File.write(PIPELINE_CONFIG, {pipelines: PIPELINES}.to_yaml)
       DetectionOutputs.instance.config_changed
+
+      # close any streams watching this as the config has changed
+      sockets = Monitor::STREAM_MUTEX.synchronize do
+        socks = Monitor::STREAM_SOCKETS[id].dup
+        Monitor::STREAM_SOCKETS.delete(id) if socks.empty?
+        socks
+      end
+      sockets.each { |sock| sock.close }
     end
   end
 
