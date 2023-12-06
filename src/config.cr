@@ -21,6 +21,7 @@ module EdgeAI
   end
   ::Log.builder.bind "action-controller.*", log_level, LOG_BACKEND
   ::Log.builder.bind "#{NAME}.*", log_level, LOG_BACKEND
+  ::Log.setup("*", :trace)
 
   # Filter out sensitive params that shouldn't be logged
   filter_params = ["password", "bearer_token"]

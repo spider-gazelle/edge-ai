@@ -25,6 +25,8 @@ class EdgeAI::Processor
   def monitor_config
     ConfigChange.instance.on_change do |file_data|
       begin
+        Log.info { "config update detected" }
+        puts "config update detected"
         update_config NamedTuple(pipelines: Hash(String, Pipeline)).from_yaml(file_data)[:pipelines]
       rescue error
         Log.warn(exception: error) { "failed to apply configuration change" }
@@ -55,6 +57,7 @@ class EdgeAI::Processor
     pipelines.each do |id, new_config|
       if old_config = @pipelines[id]?
         next if old_config.updated == new_config.updated
+        Log.info { "stream config updated: #{id}" }
 
         stop_stream(id)
         start_stream(new_config)
@@ -80,6 +83,7 @@ class EdgeAI::Processor
   end
 
   def stop_stream(id : String)
+    Log.info { "stopping stream #{id}" }
     coord = @coordinators.delete id
     signal = @signals.delete id
     coord.try &.shutdown
@@ -90,25 +94,35 @@ class EdgeAI::Processor
     return if @shutdown
 
     id = config.id.as(String)
+    Log.info { "starting stream: #{id}" }
+
     coord = Coordinator.new(id, config)
     signal = DetectionSignal.new(id)
 
     @coordinators[id] = coord
     @signals[id] = signal
 
-    coord.on_output do |_, detections|
-      signal.send(detections.to_json)
+    coord.on_output do |_, detections, stats|
+      processing_time = stats.average_milliseconds
+      signal.send({
+        fps: stats.fps(processing_time),
+        avg_time: processing_time,
+        detections: detections
+      }.to_json)
     end
     spawn { coord.run_pipeline }
   end
 
   def shutdown
     @shutdown = true
+    Log.info { "shutting down!" }
     @pipelines.each_key do |id|
       stop_stream id
     end
   end
 end
+
+::Log.setup("*", :info)
 
 processor = EdgeAI::Processor.new
 processor.start_streams
