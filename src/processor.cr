@@ -105,9 +105,9 @@ class EdgeAI::Processor
     coord.on_output do |_, detections, stats|
       processing_time = stats.average_milliseconds
       signal.send({
-        fps: stats.fps(processing_time),
-        avg_time: processing_time,
-        detections: detections
+        fps:        stats.fps(processing_time),
+        avg_time:   processing_time,
+        detections: detections,
       }.to_json)
     end
     spawn { coord.run_pipeline }

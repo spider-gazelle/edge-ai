@@ -1,10 +1,27 @@
+require "tensorflow_lite/edge_tpu"
 require "option_parser"
 require "v4l2"
 
-OptionParser.parse(ARGV.dup) do |parser|
+show_help = true
+
+parse = OptionParser.parse(ARGV.dup) do |parser|
   parser.banner = "Usage: #{PROGRAM_NAME} [arguments]"
 
-  parser.on("-d", "--devices", "List the devices available with their formats and resolutions") do
+  parser.on("-t", "--tensor", "List the coral.ai tensor accelerators available") do
+    show_help = false
+
+    puts "\nTensor Accelerators\n==================="
+    TensorflowLite::EdgeTPU.devices.each do |dev|
+      puts "* #{dev.type}"
+      puts "  #{dev.path}"
+    end
+    puts ""
+  end
+
+  parser.on("-v", "--video", "List the video devices available with their formats and resolutions") do
+    show_help = false
+
+    puts "\nVideo Hardware\n=============="
     Dir.glob("/dev/video*").each do |dev_path|
       begin
         path = Path[dev_path]
@@ -56,7 +73,8 @@ OptionParser.parse(ARGV.dup) do |parser|
   end
 
   parser.on("-h", "--help", "Show this help") do
-    puts parser
-    exit 0
+    show_help = true
   end
 end
+
+puts parse if show_help
