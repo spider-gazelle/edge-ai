@@ -36,6 +36,14 @@ class EdgeAI::Configuration < EdgeAI::Base
     pipeline
   end
 
+  # clear the current configurations
+  @[AC::Route::POST("/config/clear")]
+  def clear_all : Array(String)
+    ids = PIPELINE_MUTEX.synchronize { PIPELINES.keys }
+    ids.each { |id| destroy(id) }
+    ids
+  end
+
   # view the current configuration
   @[AC::Route::GET("/config/:id")]
   def show(

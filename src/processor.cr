@@ -23,15 +23,16 @@ class EdgeAI::Processor
   @pipelines : Hash(String, Pipeline)
 
   def monitor_config
-    ConfigChange.instance.on_change do |file_data|
+    monitor = ConfigChange.instance
+    monitor.on_change do |file_data|
       begin
         Log.info { "config update detected" }
-        puts "config update detected"
         update_config NamedTuple(pipelines: Hash(String, Pipeline)).from_yaml(file_data)[:pipelines]
       rescue error
         Log.warn(exception: error) { "failed to apply configuration change" }
       end
     end
+    monitor.watch
   end
 
   def update_config(pipelines : Hash(String, Pipeline))

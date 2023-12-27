@@ -20,6 +20,8 @@ end
 INDEX0_CONFIG = JSON.parse(%({
   "name": "image",
   "async": false,
+  "track_objects": false,
+  "min_score": 0.2,
   "input": {
     "type": "image"
   },

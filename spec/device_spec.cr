@@ -5,7 +5,7 @@ module EdgeAI
     client = AC::SpecHelper.client
 
     it "should list devices available" do
-      result = client.get("/api/edge/ai/devices")
+      result = client.get("/api/edge/ai/devices/video")
       puts JSON.parse(result.body).to_pretty_json
       result.success?.should be_true
     end
