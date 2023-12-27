@@ -8,7 +8,7 @@ class ConfidenceMonitor
   getter id : String
   getter config : Configuration::Pipeline
   @mutex : Mutex = Mutex.new
-  getter running : Bool = true
+  getter? running : Bool = true
 
   def shutdown
     @running = false
@@ -54,8 +54,8 @@ class ConfidenceMonitor
 
         @on_receive.try &.call(id, bytes[0, bytes_read].dup)
       end
-    rescue error
-      Log.warn(exception: error) { "error reading multicast stream" }
+    rescue ex
+      Log.warn(exception: ex) { "error reading multicast stream" }
       io.close
       if !closed?
         sleep 1

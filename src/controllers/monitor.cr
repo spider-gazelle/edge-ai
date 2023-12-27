@@ -31,7 +31,7 @@ class EdgeAI::Monitor < EdgeAI::Base
   def self.stream_to_sockets(monitor : ConfidenceMonitor)
     monitor.on_receive do |id, bytes|
       socks = STREAM_MUTEX.synchronize { STREAM_SOCKETS[id].dup }
-      socks.each { |sock| sock.send(bytes) }
+      socks.each(&.send(bytes))
     end
   end
 

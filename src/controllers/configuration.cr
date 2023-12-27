@@ -83,7 +83,7 @@ class EdgeAI::Configuration < EdgeAI::Base
         Monitor::STREAM_SOCKETS.delete(id) if socks.empty?
         socks
       end
-      sockets.each { |sock| sock.close }
+      sockets.each(&.close)
     end
   end
 

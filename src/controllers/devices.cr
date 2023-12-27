@@ -67,7 +67,7 @@ class EdgeAI::Devices < EdgeAI::Base
     TensorflowLite::EdgeTPU.devices.map do |dev|
       {
         type: dev.type.to_s,
-        path: dev.path
+        path: dev.path,
       }
     end
   end
