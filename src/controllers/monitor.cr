@@ -108,12 +108,14 @@ class EdgeAI::Monitor < EdgeAI::Base
 
     input = config.input
     path = case input
-           in TensorflowLite::Pipeline::Input::Stream
+           in TensorflowLite::Pipeline::Configuration::InputStream
              replay_mount / id
-           in TensorflowLite::Pipeline::Input::V4L2
+           in TensorflowLite::Pipeline::Configuration::InputDevice
              replay_mount / Path[input.path].stem
-           in TensorflowLite::Pipeline::Input::Image, TensorflowLite::Pipeline::Configuration::Input
+           in TensorflowLite::Pipeline::Configuration::InputImage
              raise "images don't support replays"
+           in TensorflowLite::Pipeline::Configuration::Input
+             raise "abstract class matched..."
            end
 
     replay(path, seconds_before.seconds, seconds_after.seconds) do |file|
@@ -128,23 +130,23 @@ class EdgeAI::Monitor < EdgeAI::Base
     created_after = before.ago
     sleep after # wait for future files to be generated
 
-    file_list = File.tempname("replay-", ".txt")
-    output_file = File.tempname("replay-", ".ts")
+    file_list = File.tempname("replay", ".txt")
+    output_file = File.tempname("replay", ".ts")
     begin
       construct_replay(path, file_list, output_file, created_after)
       File.open(output_file) do |file|
         yield file
       end
     ensure
-      File.delete output_file
-      File.delete file_list
+      File.delete? output_file
+      File.delete? file_list
     end
   end
 
   protected def construct_replay(path : Path, file_list : String, output_file : String, created_after : Time) : Nil
     files = Dir.entries(path).select do |file|
       next if {".", ".."}.includes?(file)
-      file = File.join(path, "../", file)
+      file = File.join(path, file)
 
       begin
         info = File.info(file)

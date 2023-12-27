@@ -19,9 +19,9 @@ class EdgeAI::Devices < EdgeAI::Base
     include YAML::Serializable
   end
 
-  # list the devices available locally and their capabilities
-  @[AC::Route::GET("/")]
-  def index : Array(VideoDevice)
+  # list the local video devices and their capabilities
+  @[AC::Route::GET("/video")]
+  def video_devices : Array(VideoDevice)
     Dir.glob("/dev/video*").compact_map do |dev_path|
       begin
         path = Path[dev_path]
@@ -58,6 +58,17 @@ class EdgeAI::Devices < EdgeAI::Base
         Log.error(exception: error) { "error reading #{dev_path}" }
         nil
       end
+    end
+  end
+
+  # list the available TPUs
+  @[AC::Route::GET("/tpu")]
+  def tpu_devices : Array(NamedTuple(type: String, path: String))
+    TensorflowLite::EdgeTPU.devices.map do |dev|
+      {
+        type: dev.type.to_s,
+        path: dev.path
+      }
     end
   end
 end

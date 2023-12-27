@@ -6,7 +6,7 @@ shards:
 
   ameba:
     git: https://github.com/veelenga/ameba.git
-    version: 1.5.0
+    version: 1.6.0
 
   backtracer:
     git: https://github.com/sija/backtracer.cr.git
@@ -14,7 +14,7 @@ shards:
 
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
-    version: 0.3.1
+    version: 0.4.1
 
   ffmpeg:
     git: https://github.com/spider-gazelle/ffmpeg.git
@@ -66,7 +66,7 @@ shards:
 
   tensorflow_lite:
     git: https://github.com/spider-gazelle/tensorflow_lite.git
-    version: 2.1.1
+    version: 2.1.3
 
   tflite_image:
     git: https://github.com/spider-gazelle/tflite_image.git
@@ -74,7 +74,7 @@ shards:
 
   tflite_pipeline:
     git: https://github.com/spider-gazelle/tflite_pipeline.git
-    version: 1.0.0+git.commit.59d3f583ef899afe883b7501a9b8f25d5c25792f
+    version: 1.0.0+git.commit.61b7930af6f8886b1e138f2f5a4b2c07e58c0753
 
   v4l2:
     git: https://github.com/spider-gazelle/v4l2.cr.git
