@@ -6,12 +6,8 @@ class EdgeAI::Processor
   alias Pipeline = TensorflowLite::Pipeline::Configuration::Pipeline
 
   def initialize
-    @pipelines = if File.exists?(PIPELINE_CONFIG)
-                   NamedTuple(pipelines: Hash(String, Pipeline)).from_yaml(File.read(PIPELINE_CONFIG))[:pipelines]
-                 else
-                   File.write EdgeAI::PIPELINE_CONFIG, %({"pipelines": {}})
-                   {} of String => Pipeline
-                 end
+    File.write EdgeAI::PIPELINE_CONFIG, %({"pipelines": {}}) unless File.exists?(PIPELINE_CONFIG)
+    @pipelines = read_config
   end
 
   @shutdown : Bool = false
@@ -22,12 +18,19 @@ class EdgeAI::Processor
 
   @pipelines : Hash(String, Pipeline)
 
+  def read_config : Hash(String, Pipeline)
+    NamedTuple(pipelines: Hash(String, Pipeline)).from_yaml(File.read(PIPELINE_CONFIG))[:pipelines]
+  rescue error
+    Log.warn(exception: error) { "failed to read configuration file, applying default" }
+    {} of String => Pipeline
+  end
+
   def monitor_config
     monitor = ConfigChange.instance
-    monitor.on_change do |file_data|
+    monitor.on_change do |_file_data|
       begin
         Log.info { "config update detected" }
-        update_config NamedTuple(pipelines: Hash(String, Pipeline)).from_yaml(file_data)[:pipelines]
+        update_config read_config
       rescue error
         Log.warn(exception: error) { "failed to apply configuration change" }
       end

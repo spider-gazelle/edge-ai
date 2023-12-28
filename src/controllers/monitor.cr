@@ -151,7 +151,7 @@ class EdgeAI::Monitor < EdgeAI::Base
       begin
         info = File.info(file)
         !info.size.zero? && info.modification_time >= created_after
-      rescue err : File::NotFoundError
+      rescue File::NotFoundError
         nil
       rescue error
         puts "Error obtaining file info for #{file}\n#{error.inspect_with_backtrace}"

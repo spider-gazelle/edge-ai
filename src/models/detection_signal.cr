@@ -45,5 +45,7 @@ class EdgeAI::DetectionSignal
   def shutdown
     @server.try &.close
     File.delete(@path) rescue nil
+    connections = @mutex.synchronize { @connections.dup }
+    connections.each(&.close)
   end
 end
