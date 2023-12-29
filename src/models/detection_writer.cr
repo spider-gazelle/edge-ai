@@ -1,6 +1,6 @@
 require "socket"
 
-class EdgeAI::DetectionSignal
+class EdgeAI::DetectionWriter
   Log = ::EdgeAI::Log.for("detection.signal")
 
   def initialize(@stream : String)

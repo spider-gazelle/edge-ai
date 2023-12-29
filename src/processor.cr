@@ -78,7 +78,7 @@ class EdgeAI::Processor
   alias Coordinator = TensorflowLite::Pipeline::Coordinator
 
   @coordinators : Hash(String, Coordinator) = {} of String => Coordinator
-  @signals : Hash(String, DetectionSignal) = {} of String => DetectionSignal
+  @signals : Hash(String, DetectionWriter) = {} of String => DetectionWriter
 
   def start_streams
     @pipelines.each_value do |stream|
@@ -101,7 +101,7 @@ class EdgeAI::Processor
     Log.info { "starting stream: #{id}" }
 
     coord = Coordinator.new(id, config)
-    signal = DetectionSignal.new(id)
+    signal = DetectionWriter.new(id)
 
     @coordinators[id] = coord
     @signals[id] = signal

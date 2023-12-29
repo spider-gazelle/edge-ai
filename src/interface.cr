@@ -99,7 +99,7 @@ module EdgeAI
   # Start the server
   server.run do
     puts "Listening on #{server.print_addresses}"
-    DetectionOutputs.instance
+    DetectionReaders.instance
   end
 
   # Shutdown message

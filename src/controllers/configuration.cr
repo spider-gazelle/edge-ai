@@ -83,7 +83,7 @@ class EdgeAI::Configuration < EdgeAI::Base
     PIPELINE_MUTEX.synchronize do
       yield
       File.write(PIPELINE_CONFIG, {pipelines: PIPELINES}.to_yaml)
-      DetectionOutputs.instance.config_changed
+      DetectionReaders.instance.config_changed
 
       # close any streams watching this as the config has changed
       sockets = Monitor::STREAM_MUTEX.synchronize do

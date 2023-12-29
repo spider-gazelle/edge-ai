@@ -1,9 +1,9 @@
 require "socket"
 
-class EdgeAI::DetectionOutputs
+class EdgeAI::DetectionReaders
   Log = ::EdgeAI::Log.for("detection.outputs")
 
-  class_getter instance : DetectionOutputs { new }
+  class_getter instance : DetectionReaders { new }
 
   private def initialize
     # Private constructor to prevent external instantiation
