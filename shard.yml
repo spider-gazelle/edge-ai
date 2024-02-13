@@ -5,7 +5,6 @@ dependencies:
   # The server framework
   action-controller:
     github: spider-gazelle/action-controller
-    version: ~> 7.0
 
   # AI processing
   tflite_pipeline:

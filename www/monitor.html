@@ -27,6 +27,10 @@
       width: 100%;
       height: 100%;
     }
+
+    #detections > div {
+      transition: top 0.2s ease, left 0.2s ease, width 0.2s ease, height 0.2s ease;
+    }
   </style>
 </head>
 <body>
@@ -160,22 +164,68 @@
       rect_height = (rect_height - sizes.letter_box * 2)
       rect_width = (rect_width - sizes.pillar_box * 2)
 
-      // Clear the container
-      detections.innerHTML = "";
+      // Ensure FPS span exists
+      has_span = Array.from(detections.children)
+        .filter(child => child.tagName === 'SPAN');
 
-      // Add the FPS Counter
-      let label = document.createElement("span");
-      // Set the label style
-      label.style.position = "absolute";
-      label.style.backgroundColor = "blue";
-      label.style.color = "white";
-      label.style.padding = "2px";
-      label.style.top = "0";
-      label.style.right = "0";
+      if (has_span.length === 0) {
+        let label = document.createElement("span");
+        // Set the label style
+        label.style.position = "absolute";
+        label.style.backgroundColor = "blue";
+        label.style.color = "white";
+        label.style.padding = "2px";
+        label.style.top = "0";
+        label.style.right = "0";
+        
+        // Append the box to the container
+        detections.appendChild(label);
+        has_span.push(label);
+      }
+
       // Set the label text
-      label.textContent = "FPS: " + data.fps.toFixed(2);
-      // Append the box to the container
-      detections.appendChild(label);
+      has_span[0].textContent = "FPS: " + data.fps.toFixed(2);
+
+      // get the new ids
+      const new_detection_ids = Array.from(data.detections)
+        .filter(detection => detection.type === "object" && detection.score > 0.02)
+        .map(detection => detection.uuid);
+
+      // get existing ids
+      const existing_ids = Array.from(detections.children)
+                              .filter(child => child.tagName === 'DIV')
+                              .map(div => div.id);
+
+      // remove divs that are not part of the update
+      existing_ids.forEach(id => {
+        if (!new_detection_ids.includes(id)) {
+          const elementToRemove = document.getElementById(id);
+          detections.removeChild(elementToRemove);
+        }
+      });
+
+      // ensure all the divs exist in the document
+      new_detection_ids.forEach(id => {
+        if (!existing_ids.includes(id)) {
+          // This is a stub for adding a new div, replace with your actual implementation
+          const box = document.createElement('div');
+          box.id = id;
+          box.style.position = "absolute";
+
+          // Append the label to the box
+          let label = document.createElement("span");
+          label.style.position = "absolute";
+          label.style.color = "white";
+          label.style.textShadow = "1px 1px 2px #000000";
+          label.style.padding = "2px";
+          label.style.bottom = "100%";
+          label.style.left = "0";
+          box.appendChild(label);
+
+          // Append the div to the detection element
+          detections.appendChild(box);
+        }
+      });
 
       // Loop through the detections
       for (var i = 0; i < data.detections.length; i++) {
@@ -196,32 +246,24 @@
         let bottom = (letter_box + sizes.letter_box) + rect.top + detection.bottom * rect_height;
         let right = (pillar_box + sizes.pillar_box) + rect.left + detection.right * rect_width;
         // Create a div element for the box
-        let box = document.createElement("div");
+        let box = Array.from(detections.children)
+                  .filter(div => div.id === detection.uuid)[0];
+
+
+        // let box = document.createElement("div");
         let colour = uuidToWebSafeColor(detection.uuid);
         // Set the box style
-        box.style.position = "absolute";
         box.style.border = "2px solid " + colour;
         box.style.top = top + "px";
         box.style.left = left + "px";
         box.style.width = (right - left) + "px";
         box.style.height = (bottom - top) + "px";
 
-        // Create a span element for the label
-        label = document.createElement("span");
-        // Set the label style
-        label.style.position = "absolute";
-        label.style.backgroundColor = colour;
-        label.style.color = "white";
-        label.style.textShadow = "1px 1px 2px #000000";
-        label.style.padding = "2px";
-        label.style.bottom = "100%";
-        label.style.left = "0";
-        // Set the label text
+        // Get the label
+        // label = document.createElement("span");
+        label = box.firstElementChild;
         label.textContent = detection.label + " (" + detection.score.toFixed(2) + ")";
-        // Append the label to the box
-        box.appendChild(label);
-        // Append the box to the container
-        detections.appendChild(box);
+        label.style.backgroundColor = colour;
       }
     };
   </script>

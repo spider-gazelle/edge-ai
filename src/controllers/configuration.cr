@@ -3,7 +3,7 @@ require "./application"
 
 # methods for viewing and updating the configuration of the device
 class EdgeAI::Configuration < EdgeAI::Base
-  base "/api/edge/ai"
+  base "/api/edge/ai/config"
 
   alias Pipeline = TensorflowLite::Pipeline::Configuration::Pipeline
 
@@ -20,13 +20,13 @@ class EdgeAI::Configuration < EdgeAI::Base
   end
 
   # view the current configuration
-  @[AC::Route::GET("/config")]
+  @[AC::Route::GET("/")]
   def index : Array(Pipeline)
     PIPELINE_MUTEX.synchronize { PIPELINES.values }
   end
 
   # add a new video pipeline
-  @[AC::Route::POST("/config", body: :pipeline, status_code: HTTP::Status::CREATED)]
+  @[AC::Route::POST("/", body: :pipeline, status_code: HTTP::Status::CREATED)]
   def create(pipeline : Pipeline) : Pipeline
     id = UUID.random.to_s
     save_config(id) do
@@ -37,7 +37,7 @@ class EdgeAI::Configuration < EdgeAI::Base
   end
 
   # clear the current configurations
-  @[AC::Route::POST("/config/clear")]
+  @[AC::Route::POST("/clear")]
   def clear_all : Array(String)
     ids = PIPELINE_MUTEX.synchronize { PIPELINES.keys }
     ids.each { |id| destroy(id) }
@@ -45,7 +45,7 @@ class EdgeAI::Configuration < EdgeAI::Base
   end
 
   # view the current configuration
-  @[AC::Route::GET("/config/:id")]
+  @[AC::Route::GET("/:id")]
   def show(
     @[AC::Param::Info(description: "the id of the video stream", example: "ba714f86-cac6-42c7-8956-bcf5105e1b81")]
     id : String
@@ -54,7 +54,7 @@ class EdgeAI::Configuration < EdgeAI::Base
   end
 
   # replace the configuration with new configuration
-  @[AC::Route::PUT("/config/:id", body: :pipeline)]
+  @[AC::Route::PUT("/:id", body: :pipeline)]
   def update(
     @[AC::Param::Info(description: "the id of the video stream", example: "ba714f86-cac6-42c7-8956-bcf5105e1b81")]
     id : String,
@@ -71,7 +71,7 @@ class EdgeAI::Configuration < EdgeAI::Base
   end
 
   # remove a pipeline from the device
-  @[AC::Route::DELETE("/config/:id", status_code: HTTP::Status::ACCEPTED)]
+  @[AC::Route::DELETE("/:id", status_code: HTTP::Status::ACCEPTED)]
   def destroy(
     @[AC::Param::Info(description: "the id of the video stream", example: "ba714f86-cac6-42c7-8956-bcf5105e1b81")]
     id : String
@@ -93,14 +93,5 @@ class EdgeAI::Configuration < EdgeAI::Base
       end
       sockets.each(&.close)
     end
-  end
-
-  # this file is built as part of the docker build
-  OPENAPI = YAML.parse(File.exists?("openapi.yml") ? File.read("openapi.yml") : "{}")
-
-  # returns the OpenAPI representation of this service
-  @[AC::Route::GET("/openapi")]
-  def openapi : YAML::Any
-    OPENAPI
   end
 end

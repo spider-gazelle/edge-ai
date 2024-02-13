@@ -13,11 +13,11 @@ module EdgeAI
   OptionParser.parse(ARGV.dup) do |parser|
     parser.banner = "Usage: #{PROGRAM_NAME} [arguments]"
 
-    parser.on("-b HOST", "--bind=HOST", "Specifies the server host") { |h| host = h }
-    parser.on("-p PORT", "--port=PORT", "Specifies the server port") { |p| port = p.to_i }
+    parser.on("-b HOST", "--bind=HOST", "Specifies the server host") { |set_host| host = set_host }
+    parser.on("-p PORT", "--port=PORT", "Specifies the server port") { |set_port| port = set_port.to_i }
 
-    parser.on("-w COUNT", "--workers=COUNT", "Specifies the number of processes to handle requests") do |w|
-      process_count = w.to_i
+    parser.on("-w COUNT", "--workers=COUNT", "Specifies the number of processes to handle requests") do |workers|
+      process_count = workers.to_i
     end
 
     parser.on("-r", "--routes", "List the application routes") do

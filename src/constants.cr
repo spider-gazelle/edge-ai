@@ -22,6 +22,7 @@ module EdgeAI
   COOKIE_SESSION_SECRET = ENV["COOKIE_SESSION_SECRET"]? || "4f74c0b358d5bab4000dd3c75465dc2c"
 
   PIPELINE_CONFIG = "./config/config.yml"
+  PIPELINE_STATUS = "./config/"
 
   def self.running_in_production?
     IS_PRODUCTION
