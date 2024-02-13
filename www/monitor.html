@@ -51,18 +51,42 @@
         throw 'ID parameter is not present in the URL';
     }
 
-    window.onload = function () {
-      const streamURL = window.location.origin.replace('http', 'ws') + '/api/edge/ai/monitor/stream/' + id_value;
+    const streamURL = window.location.origin.replace('http', 'ws') + '/api/edge/ai/monitor/stream/' + id_value;
+    var player = null;
 
+    const configure_player = function() {
       const videoElement = document.getElementById('player');
-      const player = mpegts.createPlayer({
-          type: 'mpegts',  // could also be mse, m2ts, flv
-          isLive: true,
-          url: streamURL
+      player = mpegts.createPlayer({
+        type: 'mpegts',  // could also be mse, m2ts, flv
+        isLive: true,
+        url: streamURL
       });
       player.attachMediaElement(videoElement);
       player.load();
       player.play();
+    };
+
+    window.onload = function () {
+      configure_player();
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          // The tab has become visible so add elements back to the screen
+          console.log('Tab is in focus, starting video');
+          if (player === null) {
+            configure_player();
+          }
+        } else if (document.visibilityState === 'hidden') {
+          // The tab is no longer visible so remove elements from the screen
+          console.log('Tab is out of focus, stopping video');
+          if (player) {
+            player.pause();
+            player.unload();
+            player.detachMediaElement();
+            player = null;
+          }
+        }
+      });
     }
 
     const uuidToWebSafeColor = function(uuid) {
