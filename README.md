@@ -110,7 +110,7 @@ For confidence monitoring the configuration above browse to:
 
 then you'll see output like:
 
-![steve](https://github.com/spider-gazelle/edge-ai/assets/368013/6c98f54e-017a-45b7-84bd-2c28c25b0b1e)
+![steve](https://github.com/spider-gazelle/edge-ai/assets/368013/8a4af7e2-228f-4c25-932c-cd257b0f87a2)
 
 
 ## Compiling

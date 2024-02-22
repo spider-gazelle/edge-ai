@@ -70,7 +70,7 @@ shards:
 
   tflite_image:
     git: https://github.com/spider-gazelle/tflite_image.git
-    version: 2.0.0+git.commit.154a374cdf020601800e9f9d71286180f392549c
+    version: 2.0.0+git.commit.666cacdcb2ec1fd01475cef3d7ac9308c603db7f
 
   tflite_pipeline:
     git: https://github.com/spider-gazelle/tflite_pipeline.git
