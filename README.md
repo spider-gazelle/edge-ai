@@ -108,6 +108,11 @@ then you can launch the processes: `cd bin`
 For confidence monitoring the configuration above browse to:
 [http://127.0.0.1:3000/monitor.html?id=3e8bca09-6b54-41aa-96eb-691a964adc50](http://127.0.0.1:3000/monitor.html?id=3e8bca09-6b54-41aa-96eb-691a964adc50)
 
+then you'll see output like:
+
+![steve](https://github.com/spider-gazelle/edge-ai/assets/368013/6c98f54e-017a-45b7-84bd-2c28c25b0b1e)
+
+
 ## Compiling
 
 `shards build`
