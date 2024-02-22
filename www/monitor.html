@@ -154,6 +154,23 @@
       };
     };
 
+    const parse_associated = function(data) {
+      if (!data.associated) {
+        return "";
+      }
+
+      let parts = data.associated.map(item => {
+        if (item.type === 'gender') {
+          return `${item.label} (${item.score})`;
+        } else if (item.type === 'age_range') {
+          return `Age: ${item.score}-${item.upper}`;
+        }
+      });
+
+      // Filter out undefined entries if any and join with <br />
+      return parts.filter(part => part !== undefined).join('<br />');
+    }
+
     // Get the video bounding rectangle
     var rect = video.getBoundingClientRect();
     var letter_box = 0.0;
@@ -212,7 +229,7 @@
 
       // get the new ids
       const new_detection_ids = Array.from(data.detections)
-        .filter(detection => detection.type === "object" && detection.score > 0.02)
+        .filter(detection => detection.uuid && detection.score > 0.02)
         .map(detection => detection.uuid);
 
       // get existing ids
@@ -256,7 +273,7 @@
         // Get the detection
         let detection = data.detections[i];
 
-        if (detection.type != "object") {
+        if (!detection.uuid) {
           continue;
         }
 
@@ -286,7 +303,7 @@
         // Get the label
         // label = document.createElement("span");
         label = box.firstElementChild;
-        label.textContent = detection.label + " (" + detection.score.toFixed(2) + ")";
+        label.innerHTML = detection.label + " (" + detection.score.toFixed(2) + ")<br />" + parse_associated(detection);
         label.style.backgroundColor = colour;
       }
     };
