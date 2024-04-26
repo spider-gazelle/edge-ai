@@ -84,6 +84,12 @@ RUN for binary in /app/bin/*; do \
 # Generate OpenAPI docs while we still have source code access
 RUN ./bin/app --docs --file=openapi.yml
 
+# configure folder for saving clips
+RUN mkdir -p /app/clips
+RUN chown appuser -R /app
+
+###############################################################################
+
 # Build a minimal docker image
 FROM scratch
 WORKDIR /
