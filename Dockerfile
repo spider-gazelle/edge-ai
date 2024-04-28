@@ -1,63 +1,40 @@
-FROM 84codes/crystal:latest-alpine as build
+FROM 84codes/crystal:latest-debian-11 as build
 WORKDIR /app
 
-# Create a non-privileged user, defaults are appuser:10001
-ARG IMAGE_UID="10001"
-ENV UID=$IMAGE_UID
-ENV USER=appuser
+# Update system and install required packages
+RUN apt-get update && apt-get install -y \
+    gnupg \
+    wget \
+    curl \
+    apt-transport-https \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# See https://stackoverflow.com/a/55757473/12429735
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    "${USER}"
+# Add Google Cloud public key
+RUN wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/coral-edgetpu.gpg
+
+# Add Coral packages repository
+RUN echo "deb [signed-by=/etc/apt/trusted.gpg.d/coral-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
 
 # Add dependencies commonly required for building crystal applications
 # hadolint ignore=DL3018
-RUN apk add \
-  --update \
-  --no-cache \
-    gcc \
-    make \
-    autoconf \
-    automake \
-    libtool \
-    patch \
-    ca-certificates \
-    yaml-dev \
-    yaml-static \
+RUN apt update && apt install -y \
+    build-essential \
+    cmake \
+    linux-headers-generic \
     git \
-    bash \
-    iputils \
-    libelf \
-    gmp-dev \
-    libxml2-dev \
-    musl-dev \
-    pcre-dev \
-    zlib-dev \
-    zlib-static \
-    libunwind-dev \
-    libunwind-static \
-    libevent-dev \
-    libevent-static \
-    libssh2-static \
-    lz4-dev \
-    lz4-static \
-    tzdata \
-    curl
-
-# Already included in the image
-# openssl-dev
-# openssl-libs-static
-
-RUN update-ca-certificates
-
-# Install any additional dependencies
-# RUN apk add libssh2 libssh2-dev
+    wget \
+    python3 \
+    libavcodec-dev \
+    libavformat-dev \
+    libavutil-dev \
+    libswscale-dev \
+    ca-certificates \
+    opencl-headers \
+    libopencv-core-dev \
+    clang-format-9 \
+    libedgetpu-dev \
+    libedgetpu1-std
 
 # Install shards for caching
 COPY shard.yml shard.yml
@@ -66,12 +43,25 @@ COPY shard.lock shard.lock
 
 RUN shards install --production --ignore-crystal-version --skip-postinstall --skip-executables
 
+# Compile Tensorflow lite and put it in place
+RUN git clone --depth 1 --branch "v2.8.4" https://github.com/tensorflow/tensorflow
+RUN mkdir tflite_build
+WORKDIR /app/tflite_build
+RUN cmake ../tensorflow/tensorflow/lite/c -DTFLITE_ENABLE_GPU=ON
+RUN cmake --build . -j4 || true
+RUN echo "---------- WE ARE BUILDING AGAIN!! ----------"
+RUN cmake --build . -j1
+RUN mkdir -p ../lib/tensorflow_lite/ext
+RUN mkdir -p ../bin
+RUN cp ./libtensorflowlite_c.so ../lib/tensorflow_lite/ext/
+RUN cp ./libtensorflowlite_c.so ../bin/
+
 # Add src
+WORKDIR /app
 COPY ./src /app/src
 
 # Build application
-RUN shards build --production --release --error-trace
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+RUN shards build --production --error-trace -Dpreview_mt
 
 # Extract binary dependencies (uncomment if not compiling a static build)
 RUN for binary in /app/bin/*; do \
@@ -82,47 +72,49 @@ RUN for binary in /app/bin/*; do \
     done
 
 # Generate OpenAPI docs while we still have source code access
-RUN ./bin/app --docs --file=openapi.yml
-
-# configure folder for saving clips
-RUN mkdir -p /app/clips
-RUN chown appuser -R /app
+RUN ./bin/interface --docs --file=openapi.yml
+RUN update-ca-certificates
+RUN mkdir ./model_storage
+RUN mkdir ./clips
 
 ###############################################################################
 
 # Build a minimal docker image
-FROM scratch
+FROM debian:stable-slim
 WORKDIR /
 ENV PATH=$PATH:/
 
-# Copy the user information over
-COPY --from=build etc/passwd /etc/passwd
-COPY --from=build /etc/group /etc/group
+# Update system and install required packages
+RUN apt-get update && apt-get install -y \
+    gnupg \
+    wget \
+    curl \
+    apt-transport-https \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# These are required for communicating with external services
-COPY --from=build /etc/hosts /etc/hosts
+# Add Google Cloud public key
+RUN wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/coral-edgetpu.gpg
 
-# These provide certificate chain validation where communicating with external services over TLS
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+# Add Coral packages repository
+RUN echo "deb [signed-by=/etc/apt/trusted.gpg.d/coral-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
 
-# This is required for Timezone support
-COPY --from=build /usr/share/zoneinfo/ /usr/share/zoneinfo/
+# Install Edge TPU runtime
+RUN apt-get update \
+    && apt-get install -y libedgetpu1-std \
+    && rm -rf /var/lib/apt/lists/*
 
-# This is your application
-COPY --from=build /app/deps /
-COPY --from=build /app/bin /
+# copy the application over
+COPY --from=build /app/bin /app/bin
+COPY --from=build /app/model_storage /model_storage
+COPY --from=build /app/clips /clips
+COPY ./www /www
 
 # Copy the docs into the container, you can serve this file in your app
 COPY --from=build /app/openapi.yml /openapi.yml
 
-# Use an unprivileged user.
-USER appuser:appuser
-
-# Spider-gazelle has a built in helper for health checks (change this as desired for your applications)
-HEALTHCHECK CMD ["/app", "-c", "http://127.0.0.1:3000/"]
-
 # Run the app binding on port 3000
 EXPOSE 3000
-ENTRYPOINT ["/app"]
-CMD ["/app", "-b", "0.0.0.0", "-p", "3000"]
+VOLUME ["/clips/", "/model_storage/"]
+ENTRYPOINT ["/app/bin/interface"]
+CMD ["/app/bin/interface", "-b", "0.0.0.0", "-p", "3000"]
