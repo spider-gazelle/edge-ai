@@ -6,7 +6,6 @@ class EdgeAI::Processor
   alias Pipeline = TensorflowLite::Pipeline::Configuration::Pipeline
 
   def initialize
-    File.write EdgeAI::PIPELINE_CONFIG, %({"pipelines": {}}) unless File.exists?(PIPELINE_CONFIG)
     @pipelines = read_config
   end
 
@@ -47,14 +46,14 @@ class EdgeAI::Processor
     if removed.size > 0
       Log.info { "removing #{removed.size} detection streams" }
       removed.each do |id|
-        stop_stream id
+        stop_process id
       end
     end
 
     # add any new streams
     added = new_keys - old_keys
     added.each do |id|
-      start_stream pipelines[id]
+      start_process id
     end
 
     # find any with changes
@@ -63,12 +62,41 @@ class EdgeAI::Processor
         next if old_config.updated == new_config.updated
         Log.info { "stream config updated: #{id}" }
 
-        stop_stream(id)
-        start_stream(new_config)
+        stop_process id
+        sleep 1
+        start_process id
       end
     end
 
     @pipelines = pipelines
+  end
+
+  # ========================
+  # Process management
+  # ========================
+
+  alias BackgroundTask = TensorflowLite::Pipeline::BackgroundTask
+
+  # stream_id => process
+  @processes : Hash(String, BackgroundTask) = {} of String => BackgroundTask
+
+  def start_processes : Nil
+    @pipelines.each_key { |id| start_process(id) }
+  end
+
+  def start_process(id : String) : Nil
+    Log.info { "Process starting: #{id}" }
+    process_path = Process.executable_path.as(String)
+    task = BackgroundTask.new
+    task.run process_path, "-s", id
+    @processes[id] = task
+  end
+
+  def stop_process(id : String) : Nil
+    Log.info { "Process stopping: #{id}" }
+    if task = @processes.delete id
+      task.close
+    end
   end
 
   # ========================
@@ -81,23 +109,27 @@ class EdgeAI::Processor
   @signals : Hash(String, DetectionWriter) = {} of String => DetectionWriter
 
   def start_streams
-    @pipelines.each_value do |stream|
-      start_stream stream
+    @pipelines.each_key do |id|
+      start_stream id
     end
   end
 
   def stop_stream(id : String)
-    Log.info { "stopping stream #{id}" }
     coord = @coordinators.delete id
     signal = @signals.delete id
-    coord.try &.shutdown
-    signal.try &.shutdown
+    if signal
+      Log.info { "stopping stream #{id}" }
+      coord.try &.shutdown
+      signal.shutdown
+    end
   end
 
-  def start_stream(config : Pipeline)
+  def start_stream(id : String)
     return if @shutdown
 
-    id = config.id.as(String)
+    config = @pipelines[id]?
+    return unless config
+
     Log.info { "starting stream: #{id}" }
 
     coord = Coordinator.new(id, config)
@@ -123,29 +155,45 @@ class EdgeAI::Processor
     @pipelines.each_key do |id|
       stop_stream id
     end
+
+    @processes.keys.each { |id| stop_process(id) }
+  end
+end
+
+require "tflite_pipeline"
+
+stream_id = nil
+OptionParser.parse(ARGV.dup) do |parser|
+  parser.banner = "Manages the AI pipelines based on the config file"
+
+  parser.on("-s STREAM", "--stream=STREAM", "Specifies the stream this process should pipeline") do |stream|
+    stream_id = stream
   end
 end
 
 ::Log.setup("*", :info)
 
-processor = EdgeAI::Processor.new
-processor.start_streams
-processor.monitor_config
+if stream_id
+  # start processing the pipeline
+  processor = EdgeAI::Processor.new
+  processor.start_stream stream_id.as(String)
+else # this is the management process
+  # ensure a config file exists
+  File.write EdgeAI::PIPELINE_CONFIG, %({"pipelines": {}}) unless File.exists?(EdgeAI::PIPELINE_CONFIG)
 
+  # start child processes
+  processor = EdgeAI::Processor.new
+  processor.start_processes
+  processor.monitor_config
+end
+
+# Shutdown gracefully
 channel = Channel(Nil).new
-
-terminate = Proc(Signal, Nil).new do |signal|
+Process.on_terminate do
   puts " > terminating gracefully"
   spawn do
     processor.shutdown
     channel.close
   end
-  signal.ignore
 end
-
-# Detect ctr-c to shutdown gracefully
-# Docker containers use the term signal
-Signal::INT.trap &terminate
-Signal::TERM.trap &terminate
-
 channel.receive?
