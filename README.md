@@ -15,7 +15,7 @@ graph TD;
         RestAPI["REST API"]
         Websocket["Detections Websocket"]
     end
-    Camera
+    Camera["USB Camera"]
     Stream["Multicast Video Stream"]
 
     ProcessorManager --> V4L2
