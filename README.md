@@ -2,6 +2,33 @@
 
 A tool for running AI models at the edge. Designed to minimize latency in processing
 
+```mermaid
+graph TD;
+    subgraph AI Processing
+        ProcessorManager["Processor Manager"]
+        V4L2["V4L2 AI Process"]
+        BroadcastStream["Stream AI Process"]
+    end
+    UnixPipe["Unix Pipes"]
+    Config["Config File"]
+    subgraph HTTPService["HTTP Interface"]
+        RestAPI["REST API"]
+        Websocket["Detections Websocket"]
+    end
+    Camera
+    Stream["Multicast Video Stream"]
+
+    ProcessorManager --> V4L2
+    ProcessorManager --> BroadcastStream
+    BroadcastStream --> UnixPipe
+    V4L2 --> UnixPipe
+    UnixPipe --> Websocket
+    RestAPI --> Config
+    Config --> ProcessorManager
+    Camera --> V4L2
+    Stream --> BroadcastStream
+```
+
 ## Documentation
 
 To test this out quickly, you can do the following:
