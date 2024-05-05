@@ -12,6 +12,10 @@ shards:
     git: https://github.com/sija/backtracer.cr.git
     version: 1.2.2
 
+  cron_parser:
+    git: https://github.com/kostya/cron_parser.git
+    version: 0.4.0
+
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
     version: 0.4.1
@@ -19,6 +23,14 @@ shards:
   ffmpeg:
     git: https://github.com/spider-gazelle/ffmpeg.git
     version: 1.1.0+git.commit.1d3149450d8503cc13a59f827f830a765400af2f
+
+  future:
+    git: https://github.com/crystal-community/future.cr.git
+    version: 1.0.0
+
+  gpio:
+    git: https://github.com/spider-gazelle/gpio.cr.git
+    version: 1.1.0
 
   habitat:
     git: https://github.com/luckyframework/habitat.git
@@ -63,6 +75,10 @@ shards:
   stumpy_utils:
     git: https://github.com/stumpycr/stumpy_utils.git
     version: 0.5.1
+
+  tasker:
+    git: https://github.com/spider-gazelle/tasker.git
+    version: 2.1.4
 
   tensorflow_lite:
     git: https://github.com/spider-gazelle/tensorflow_lite.git

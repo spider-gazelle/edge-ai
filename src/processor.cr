@@ -1,6 +1,7 @@
 require "option_parser"
 require "./constants"
 require "./models/*"
+require "tasker"
 
 class EdgeAI::Processor
   alias Pipeline = TensorflowLite::Pipeline::Configuration::Pipeline
@@ -105,6 +106,7 @@ class EdgeAI::Processor
 
   alias Coordinator = TensorflowLite::Pipeline::Coordinator
 
+  @motion_detection : Hash(String, Motion) = {} of String => Motion
   @coordinators : Hash(String, Coordinator) = {} of String => Coordinator
   @signals : Hash(String, DetectionWriter) = {} of String => DetectionWriter
 
@@ -116,12 +118,25 @@ class EdgeAI::Processor
 
   def stop_stream(id : String)
     coord = @coordinators.delete id
+    motion = @motion_detection.delete id
+    motion.try &.shutdown
+
     signal = @signals.delete id
     if signal
       Log.info { "stopping stream #{id}" }
       coord.try &.shutdown
       signal.shutdown
     end
+  end
+
+  class MotionState
+    def initialize
+      @running = false
+      @debounce = Time.utc
+    end
+
+    property running : Bool
+    property debounce : Time
   end
 
   def start_stream(id : String)
@@ -146,7 +161,53 @@ class EdgeAI::Processor
         detections: detections,
       }.to_json)
     end
-    spawn { coord.run_pipeline }
+
+    if motion_config = config.motion_detector
+      motion = Motion.new(**motion_config)
+      @motion_detection[id] = motion
+
+      state = MotionState.new
+      trigger_output = config.motion_trigger_output.group_by { |io|
+        io[:chip]
+      }.flat_map do |chip, lines|
+        gpio = GPIO::Chip.new chip
+        lines.map do |io|
+          line_num = io[:line]
+          line = gpio.line(line_num)
+          line.request_output
+          line
+        end
+      end
+
+      motion.on_motion do
+        now = Time.utc
+        next if state.running || state.debounce > now
+
+        # switch on USB port and/or IR lights
+        trigger_output.each(&.set_high)
+
+        # start the
+        state.running = true
+        spawn { coord.run_pipeline }
+        schedule_shutdown(config, coord, motion, state, trigger_output)
+      end
+    else
+      spawn { coord.run_pipeline }
+    end
+  end
+
+  protected def schedule_shutdown(config, coord, motion, state, trigger_output)
+    Tasker.in(config.motion_active_seconds.seconds) do
+      # is motion still being detected
+      if motion.detected
+        schedule_shutdown(config, coord, motion, state, trigger_output)
+      else
+        coord.shutdown
+        state.debounce = config.motion_debounce_seconds.seconds.from_now
+        state.running = false
+        trigger_output.each(&.set_low)
+      end
+    end
   end
 
   def shutdown

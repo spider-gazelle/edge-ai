@@ -1,6 +1,7 @@
 require "tensorflow_lite/edge_tpu"
 require "option_parser"
 require "v4l2"
+require "gpio"
 
 show_help = true
 
@@ -14,6 +15,19 @@ parse = OptionParser.parse(ARGV.dup) do |parser|
     TensorflowLite::EdgeTPU.devices.each do |dev|
       puts "* #{dev.type}"
       puts "  #{dev.path}"
+    end
+    puts ""
+  end
+
+  parser.on("-g", "--gpio", "List the General Purpose Input Output chips available") do
+    show_help = false
+
+    puts "\nGPIO Chips\n==================="
+    Dir.glob("/dev/gpiochip*").sort! do |path|
+      chip = GPIO::Chip.new(Path[path])
+      puts "* #{chip.name} (#{chip.label})"
+      puts "  path:  #{path}"
+      puts "  lines: #{chip.num_lines}"
     end
     puts ""
   end

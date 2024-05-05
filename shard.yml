@@ -16,6 +16,14 @@ dependencies:
     github: petoem/inotify.cr
     branch: master
 
+  # General Purpose IO control
+  gpio:
+    github: spider-gazelle/gpio.cr
+
+  # scheduled tasks
+  tasker:
+    github: spider-gazelle/tasker
+
 development_dependencies:
   ameba:
     github: veelenga/ameba

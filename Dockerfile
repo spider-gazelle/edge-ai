@@ -76,6 +76,7 @@ RUN ./bin/interface --docs --file=openapi.yml
 RUN update-ca-certificates
 RUN mkdir ./model_storage
 RUN mkdir ./clips
+RUN mkdir ./config
 
 ###############################################################################
 
@@ -105,8 +106,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # copy the application over
-COPY --from=build /app/bin /app/bin
+COPY --from=build /app/bin /
+COPY --from=build /app/deps /
 COPY --from=build /app/model_storage /model_storage
+COPY --from=build /app/config /config
 COPY --from=build /app/clips /clips
 COPY ./www /www
 
@@ -116,5 +119,5 @@ COPY --from=build /app/openapi.yml /openapi.yml
 # Run the app binding on port 3000
 EXPOSE 3000
 VOLUME ["/clips/", "/model_storage/"]
-ENTRYPOINT ["/app/bin/interface"]
-CMD ["/app/bin/interface", "-b", "0.0.0.0", "-p", "3000"]
+ENTRYPOINT ["/interface"]
+CMD ["/interface", "-b", "0.0.0.0", "-p", "3000"]

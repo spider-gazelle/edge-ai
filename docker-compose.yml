@@ -3,9 +3,53 @@ services:
   # The Spider-Gazelle service
   # run: `docker-compose build` to update the service
   # run: `docker-compose up -d` to launch the service
-  sg:
+  processor:
+    # image: stakach/edgeai
     build: .
+    restart: unless-stopped
+
+    # network
+    container_name: processor
+    hostname: processor
+    network_mode: "host"
+
+    # security (USB control required for battery)
+    volumes:
+      - ./models/:/models/
+      - /dev/bus/usb:/dev/bus/usb
+  
+    devices:
+      - "/dev/gpiochip0"
+    
     ports:
       - "3000:3000"
     environment:
       SG_ENV: "production"
+
+  interface:
+    # image: stakach/edgeai
+    build: .
+    restart: unless-stopped
+
+    # network
+    container_name: interface
+    hostname: interface
+    network_mode: "host"
+
+    volumes:
+      - ./config/:/config/
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    hostname: nginx
+    depends_on:
+      - imagine
+      - stream
+    volumes:
+      - ./www/:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 5000:80
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

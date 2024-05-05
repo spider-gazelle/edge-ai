@@ -15,4 +15,11 @@ class TensorflowLite::Pipeline::Configuration::Pipeline
 
   # ws, tcp, host, port
   property mqtt_uri : String? = nil
+
+  # motion sensor activation
+  alias IOLine = NamedTuple(chip: String, line: Int32)
+  property motion_detector : IOLine? = nil
+  property motion_active_seconds : Int32 { 20 }
+  property motion_debounce_seconds : Int32 { 3 }
+  property motion_trigger_output : Array(IOLine) { [] of IOLine }
 end
