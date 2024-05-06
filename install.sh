@@ -15,19 +15,22 @@ echo "========================"
 echo "===Installing Tooling==="
 echo "========================"
 apt update
-apt install -y wget curl dnsutils ca-certificates
+apt install -y wget curl coreutils dnsutils ca-certificates lsb-release
+
+# Obtain the OS distributor name
+DISTRO=$(lsb_release -i | cut -d: -f2 | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
 
 echo "======================="
 echo "===Installing Docker==="
 echo "======================="
 # Add Docker's official GPG key:
 install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+curl -fsSL https://download.docker.com/linux/$DISTRO/gpg -o /etc/apt/keyrings/docker.asc
 chmod a+r /etc/apt/keyrings/docker.asc
 
 # Add the repository to Apt sources:
 echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/$DISTRO \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 apt update
@@ -101,5 +104,5 @@ ifconfig lo up
 route add -net 224.0.0.0 netmask 240.0.0.0 dev lo
 
 # run the crystal lang install helper
-shards build --production --ignore-crystal-version --skip-postinstall --skip-executables installer hw_info
+shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install hw_info
 ./bin/install
