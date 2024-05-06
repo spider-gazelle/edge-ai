@@ -1,4 +1,4 @@
-FROM 84codes/crystal:latest-debian-11 as build
+FROM 84codes/crystal:latest-debian-12 as build
 WORKDIR /app
 
 # Update system and install required packages
@@ -32,9 +32,9 @@ RUN apt update && apt install -y \
     ca-certificates \
     opencl-headers \
     libopencv-core-dev \
-    clang-format-9 \
     libedgetpu-dev \
-    libedgetpu1-std
+    libedgetpu1-std \
+    libgpiod-dev
 
 # Install shards for caching
 COPY shard.yml shard.yml
@@ -61,7 +61,7 @@ WORKDIR /app
 COPY ./src /app/src
 
 # Build application
-RUN shards build --production --error-trace -Dpreview_mt
+RUN shards build --production --error-trace -Dpreview_mt -O1
 
 # Extract binary dependencies (uncomment if not compiling a static build)
 RUN for binary in /app/bin/*; do \
@@ -107,7 +107,7 @@ RUN apt-get update \
 
 # copy the application over
 COPY --from=build /app/bin /
-COPY --from=build /app/deps /
+# COPY --from=build /app/deps /
 COPY --from=build /app/model_storage /model_storage
 COPY --from=build /app/config /config
 COPY --from=build /app/clips /clips

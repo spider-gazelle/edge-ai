@@ -40,3 +40,6 @@ targets:
 
   hw_info:
     main: src/hw_info.cr
+
+  install:
+    main: src/install.cr

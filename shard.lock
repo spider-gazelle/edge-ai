@@ -2,7 +2,7 @@ version: 2.0
 shards:
   action-controller:
     git: https://github.com/spider-gazelle/action-controller.git
-    version: 7.3.1
+    version: 7.4.1
 
   ameba:
     git: https://github.com/veelenga/ameba.git
@@ -22,7 +22,7 @@ shards:
 
   ffmpeg:
     git: https://github.com/spider-gazelle/ffmpeg.git
-    version: 1.1.0+git.commit.1d3149450d8503cc13a59f827f830a765400af2f
+    version: 1.2.0+git.commit.fb4143e20c1bc5723b3d74d1ceeef6039f4d7ae6
 
   future:
     git: https://github.com/crystal-community/future.cr.git
@@ -62,7 +62,7 @@ shards:
 
   promise:
     git: https://github.com/spider-gazelle/promise.git
-    version: 3.0.0
+    version: 3.1.0
 
   stumpy_core:
     git: https://github.com/stumpycr/stumpy_core.git
@@ -90,7 +90,7 @@ shards:
 
   tflite_pipeline:
     git: https://github.com/spider-gazelle/tflite_pipeline.git
-    version: 1.0.0+git.commit.936e8de4d3c4bc249e5c820788e54236dd43466d
+    version: 1.0.0+git.commit.0209f313aa40b9b06ed6e6044bc813b92f0a961a
 
   v4l2:
     git: https://github.com/spider-gazelle/v4l2.cr.git
