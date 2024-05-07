@@ -35,7 +35,7 @@ echo \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 apt update
 
-apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
+apt install -y python3-distutils-extra docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
 
 groupadd docker
 
@@ -108,5 +108,5 @@ ip link set lo up
 ip route add 224.0.0.0/4 dev lo
 
 # run the crystal lang install helper
-sudo -u $CURRENT_USER shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install
+sudo -u "$CURRENT_USER" shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install
 ./bin/install
