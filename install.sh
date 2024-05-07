@@ -15,7 +15,7 @@ echo "========================"
 echo "===Installing Tooling==="
 echo "========================"
 apt update
-apt install -y wget curl coreutils dnsutils ca-certificates lsb-release
+apt install -y wget curl coreutils dnsutils ca-certificates lsb-release iproute2
 
 # Obtain the OS distributor name
 DISTRO=$(lsb_release -i | cut -d: -f2 | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
@@ -100,9 +100,13 @@ echo "===Configuring OS==="
 echo "===================="
 
 # enable multicast on loopback device
-ifconfig lo up
-route add -net 224.0.0.0 netmask 240.0.0.0 dev lo
+
+# Bring up the loopback interface
+ip link set lo up
+
+# Add the multicast route
+ip route add 224.0.0.0/4 dev lo
 
 # run the crystal lang install helper
-sudo -u $CURRENT_USER shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install hw_info
+sudo -u $CURRENT_USER shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install
 ./bin/install
