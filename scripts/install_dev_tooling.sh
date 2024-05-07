@@ -10,7 +10,7 @@ fi
 echo "=================================="
 echo "===Installing Development Tools==="
 echo "=================================="
-apt apt update && apt install -y \
+apt update && apt install -y \
     build-essential \
     cmake \
     linux-headers-generic \
