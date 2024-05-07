@@ -21,14 +21,14 @@ INDEX0_CONFIG = JSON.parse(%({
   "name": "image",
   "async": false,
   "track_objects": false,
-  "min_score": 0.2,
   "input": {
     "type": "image"
   },
   "output": [{
     "type": "object_detection",
     "model_uri": "https://storage.googleapis.com/tfhub-lite-models/tensorflow/lite-model/efficientdet/lite2/detection/metadata/1.tflite",
-    "scaling_mode": "cover", "gpu_delegate":false,"warnings":[],"pipeline":[]
+    "scaling_mode": "cover", "gpu_delegate":false,"warnings":[],"pipeline":[],
+    "min_score": 0.3
   },{
     "type": "face_detection",
     "model_uri": "https://raw.githubusercontent.com/patlevin/face-detection-tflite/main/fdlite/data/face_detection_back.tflite",
@@ -36,19 +36,21 @@ INDEX0_CONFIG = JSON.parse(%({
     "gpu_delegate":false,
     "strides": [16, 32, 32, 32],
     "warnings":[],
-    "pipeline":[]
+    "pipeline":[],
+    "min_score": 0.3
   },{
     "type": "pose_detection",
     "model_uri": "https://storage.googleapis.com/tfhub-lite-models/google/lite-model/movenet/singlepose/lightning/tflite/int8/4.tflite",
-    "scaling_mode": "cover", "gpu_delegate":false,"warnings":[],"pipeline":[]
+    "scaling_mode": "cover", "gpu_delegate":false,"warnings":[],"pipeline":[],
+    "min_score": 0.3
   }]
 })).to_json
 
 module EdgeAI
-  def self.cleanup(json) : String
+  def self.cleanup(json) : JSON::Any
     resp = JSON.parse(json).as_h
     resp.delete("updated")
     resp.delete("id")
-    resp.to_json
+    JSON.parse resp.to_json
   end
 end

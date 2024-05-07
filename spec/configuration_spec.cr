@@ -29,7 +29,7 @@ module EdgeAI
 
     it "should add and fetch new config" do
       result = client.post("/api/edge/ai/config", body: INDEX0_CONFIG)
-      cleanup(result.body).should eq INDEX0_CONFIG
+      cleanup(result.body).should eq JSON.parse(INDEX0_CONFIG)
 
       second_result = client.get("/api/edge/ai/config")
       second_result.body.should eq %([#{result.body}])
@@ -37,7 +37,7 @@ module EdgeAI
       id = JSON.parse(second_result.body)[0]["id"].as_s
 
       result = client.get("/api/edge/ai/config/#{id}")
-      cleanup(result.body).should eq INDEX0_CONFIG
+      cleanup(result.body).should eq JSON.parse(INDEX0_CONFIG)
 
       sleep 0.1
       change_count.should eq 3
@@ -49,7 +49,7 @@ module EdgeAI
       id = JSON.parse(result.body)[0]["id"].as_s
 
       result = client.put("/api/edge/ai/config/#{id}", body: INDEX0_CONFIG)
-      cleanup(result.body).should eq INDEX0_CONFIG
+      cleanup(result.body).should eq JSON.parse(INDEX0_CONFIG)
 
       second_result = client.get("/api/edge/ai/config")
       second_result.body.should eq %([#{result.body}])

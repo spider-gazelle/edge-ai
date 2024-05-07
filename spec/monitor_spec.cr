@@ -13,12 +13,12 @@ module EdgeAI
 
       result = client.post("/api/edge/ai/config", body: INDEX0_CONFIG)
       id = JSON.parse(result.body)["id"].as_s
-      signal = EdgeAI::DetectionSignal.new(id)
+      signal = EdgeAI::DetectionWriter.new(id)
       sleep 0.1
-      DetectionOutputs.instance.config_changed
+      DetectionReaders.instance.config_changed
       sleep 0.1
 
-      websocket = client.establish_ws("/api/edge/ai/monitor/detections/#{id}")
+      websocket = client.establish_ws("/api/edge/ai/monitor/#{id}/detections")
       payload = %({"testing": "hello"})
 
       ws_data = nil
