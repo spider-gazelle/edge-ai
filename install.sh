@@ -37,7 +37,7 @@ apt update
 
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
 
-groupadd docker || echo "Group docker already exists."
+groupadd docker
 
 # Obtain the current username who invoked sudo
 CURRENT_USER=${SUDO_USER:-$(whoami)}
@@ -80,7 +80,7 @@ echo "==================================="
 apt install -y gpiod libgpiod-dev
 
 # Create the gpio-users group
-groupadd gpio-users || echo "Group gpio-users already exists."
+groupadd gpio-users
 
 # Add the current user to the gpio-users group
 usermod -aG gpio-users "$CURRENT_USER"
@@ -104,5 +104,5 @@ ifconfig lo up
 route add -net 224.0.0.0 netmask 240.0.0.0 dev lo
 
 # run the crystal lang install helper
-shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install hw_info
+sudo -u $CURRENT_USER shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install hw_info
 ./bin/install
