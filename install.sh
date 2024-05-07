@@ -15,7 +15,7 @@ echo "========================"
 echo "===Installing Tooling==="
 echo "========================"
 apt update
-apt install -y wget curl coreutils dnsutils ca-certificates lsb-release iproute2
+apt install -y wget curl coreutils dnsutils ca-certificates lsb-release iproute2 gnupg apt-transport-https
 
 # Obtain the OS distributor name
 DISTRO=$(lsb_release -i | cut -d: -f2 | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
