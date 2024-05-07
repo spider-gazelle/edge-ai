@@ -28,3 +28,6 @@ apt update && apt install -y \
     libedgetpu-dev \
     libedgetpu1-std \
     libgpiod-dev
+
+# no longer needed in the docker container so seperating here
+apt install -y clang-format-9
