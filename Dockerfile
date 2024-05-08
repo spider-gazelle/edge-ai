@@ -122,17 +122,6 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Add Google Cloud public key
-RUN wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/coral-edgetpu.gpg
-
-# Add Coral packages repository
-RUN echo "deb [signed-by=/etc/apt/trusted.gpg.d/coral-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
-
-# Install Edge TPU runtime
-RUN apt-get update \
-    && apt-get install -y libedgetpu1-std \
-    && rm -rf /var/lib/apt/lists/*
-
 # copy the application over
 COPY --from=build /app/bin /
 # COPY --from=build /app/deps /
