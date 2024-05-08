@@ -35,7 +35,13 @@ echo \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 apt update
 
-apt install -y python3-distutils-extra docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
+apt install -y python3-distutils-extra docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# add docker-compose command for backwards compat
+curl -SL https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+chmod +x /usr/bin/docker-compose
 
 groupadd docker
 

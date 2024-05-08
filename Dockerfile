@@ -118,25 +118,29 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     rsync \
-    gnupg \
+    ffmpeg \
     apt-transport-https \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # copy the application over
 COPY --from=build /app/bin /
+
+# copy over shared libs
 COPY --from=build /app/deps /tmp_deps
 RUN rsync -av /tmp_deps/ /
 RUN rm -rf ./tmp_deps
 RUN mv /app/bin/libtensorflowlite_c.so /usr/local/lib/
 ENV LDFLAGS="-L/usr/local/lib"
 RUN ldconfig
+
+# configure folders
 COPY --from=build /app/model_storage /model_storage
 COPY --from=build /app/config /config
 COPY --from=build /app/clips /clips
 COPY ./www /www
 
-# Copy the docs into the container, you can serve this file in your app
+# Copy the API docs into the container
 COPY --from=build /app/openapi.yml /openapi.yml
 
 # Run the app binding on port 3000

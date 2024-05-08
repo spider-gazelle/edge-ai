@@ -1,6 +1,6 @@
 version: '3'
 services:
-  # The Spider-Gazelle service
+  # The Edge AI service
   # run: `docker-compose build` to update the service
   # run: `docker-compose up -d` to launch the service
   processor:
@@ -8,14 +8,18 @@ services:
     build: .
     restart: unless-stopped
 
-    # network
+    # network, host mode as we need multicast support
     container_name: processor
     hostname: processor
     network_mode: "host"
 
-    # security (USB control required for battery)
     volumes:
-      - ./models/:/models/
+      - ./config/:/config/
+      - /mnt/ramdisk:/mnt/ramdisk
+      - ./model_storage/:/model_storage/
+
+      # we need to map in all the USB devices
+      # as edge TPU device name changes when initialized
       - /dev/bus/usb:/dev/bus/usb
   
     devices:
@@ -37,12 +41,14 @@ services:
     network_mode: "host"
 
     volumes:
+      - ./clips/:/clips/
       - ./config/:/config/
+      - /mnt/ramdisk:/mnt/ramdisk
 
-  nginx:
+  frontend:
     image: nginx
-    container_name: nginx
-    hostname: nginx
+    container_name: frontend
+    hostname: frontend
     depends_on:
       - interface
     volumes:
