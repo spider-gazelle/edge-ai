@@ -115,16 +115,22 @@ ENV PATH=$PATH:/
 
 # Update system and install required packages
 RUN apt-get update && apt-get install -y \
-    gnupg \
     wget \
     curl \
+    rsync \
+    gnupg \
     apt-transport-https \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # copy the application over
 COPY --from=build /app/bin /
-# COPY --from=build /app/deps /
+COPY --from=build /app/deps /tmp_deps
+RUN rsync -av /tmp_deps/ /
+RUN rm -rf ./tmp_deps
+RUN mv /app/bin/libtensorflowlite_c.so /usr/local/lib/
+ENV LDFLAGS="-L/usr/local/lib"
+RUN ldconfig
 COPY --from=build /app/model_storage /model_storage
 COPY --from=build /app/config /config
 COPY --from=build /app/clips /clips

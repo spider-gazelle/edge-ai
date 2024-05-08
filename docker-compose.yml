@@ -44,8 +44,7 @@ services:
     container_name: nginx
     hostname: nginx
     depends_on:
-      - imagine
-      - stream
+      - interface
     volumes:
       - ./www/:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
