@@ -32,8 +32,6 @@ RUN apt update && apt install -y \
     ca-certificates \
     opencl-headers \
     libopencv-core-dev \
-    libedgetpu-dev \
-    libedgetpu1-std \
     libgpiod-dev
 
 # Install shards for caching
@@ -43,8 +41,8 @@ COPY shard.lock shard.lock
 
 RUN shards install --production --ignore-crystal-version --skip-postinstall --skip-executables
 
-# Compile Tensorflow lite and put it in place
-RUN git clone --depth 1 --branch "v2.8.4" https://github.com/tensorflow/tensorflow
+# Compile Tensorflow lite
+RUN git clone --depth 1 --branch "v2.16.1" https://github.com/tensorflow/tensorflow
 RUN mkdir tflite_build
 WORKDIR /app/tflite_build
 RUN cmake ../tensorflow/tensorflow/lite/c -DTFLITE_ENABLE_GPU=ON
@@ -55,6 +53,36 @@ RUN mkdir -p ../lib/tensorflow_lite/ext
 RUN mkdir -p ../bin
 RUN cp ./libtensorflowlite_c.so ../lib/tensorflow_lite/ext/
 RUN cp ./libtensorflowlite_c.so ../bin/
+
+# Compile flatbuffers
+WORKDIR /app
+RUN git clone --branch v23.5.26 --depth 1 https://github.com/google/flatbuffers
+WORKDIR /app/flatbuffers
+RUN cmake -G "Unix Makefiles" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DFLATBUFFERS_BUILD_SHAREDLIB:BOOL=ON
+RUN make && make install
+
+# Compile libedgetpu
+WORKDIR /app
+RUN git clone https://github.com/google-coral/libedgetpu
+WORKDIR /app/libedgetpu
+
+# TODO:: remove once https://github.com/google-coral/libedgetpu/pull/66 is merged
+RUN git remote add upstream https://github.com/NobuoTsukamoto/libedgetpu
+RUN git fetch upstream
+RUN git config --global user.email "example@example.com"
+RUN git config --global user.name "Your Name"
+RUN git cherry-pick dff851aa3124afce5f7d149c843d82b14c05c075
+
+RUN apt install -y libabsl-dev libusb-1.0-0-dev
+ENV LDFLAGS="-L/usr/local/lib"
+ENV TFROOT="../tensorflow"
+RUN make -f makefile_build/Makefile -j$(nproc) libedgetpu
+RUN cp ./out/direct/k8/libedgetpu.so.1.0 ../bin/libedgetpu.so
+RUN cp ./out/direct/k8/libedgetpu.so.1.0 /usr/local/lib/libedgetpu.so
+RUN cp ./out/direct/k8/libedgetpu.so.1.0 /usr/local/lib/libedgetpu.so.1
+RUN ldconfig
 
 # Add src
 WORKDIR /app

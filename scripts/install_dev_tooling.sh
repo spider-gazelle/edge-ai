@@ -25,6 +25,6 @@ apt update && apt install -y \
     ca-certificates \
     opencl-headers \
     libopencv-core-dev \
-    libedgetpu-dev \
-    libedgetpu1-std \
-    libgpiod-dev
+    libgpiod-dev \
+    libabsl-dev \
+    libusb-1.0-0-dev
