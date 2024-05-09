@@ -3,7 +3,7 @@ services:
   # run: `docker-compose build` to update the service
   # run: `docker-compose up -d` to launch the service
   processor:
-    image: stakach/edgeai
+    image: stakach/edge-ai
     # build: .
     restart: unless-stopped
 
@@ -30,7 +30,7 @@ services:
       SG_ENV: "production"
 
   interface:
-    image: stakach/edgeai
+    image: stakach/edge-ai
     # build: .
     restart: unless-stopped
 
