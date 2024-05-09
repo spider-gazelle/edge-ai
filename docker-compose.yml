@@ -3,8 +3,8 @@ services:
   # run: `docker-compose build` to update the service
   # run: `docker-compose up -d` to launch the service
   processor:
-    # image: stakach/edgeai
-    build: .
+    image: stakach/edgeai
+    # build: .
     restart: unless-stopped
 
     # network, host mode as we need multicast support
@@ -30,8 +30,8 @@ services:
       SG_ENV: "production"
 
   interface:
-    # image: stakach/edgeai
-    build: .
+    image: stakach/edgeai
+    # build: .
     restart: unless-stopped
 
     # network
