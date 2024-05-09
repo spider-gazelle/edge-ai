@@ -1,4 +1,3 @@
-version: '3'
 services:
   # The Edge AI service
   # run: `docker-compose build` to update the service
