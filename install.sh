@@ -105,6 +105,48 @@ echo "===================="
 echo "===Configuring OS==="
 echo "===================="
 
+# increase the swap memory
+# Path to the swap configuration file
+SWAP_FILE="/etc/dphys-swapfile"
+
+# Desired configurations
+CONF_SWAPSIZE="CONF_SWAPSIZE=4096"
+CONF_MAXSWAP="CONF_MAXSWAP=4096"
+
+# Function to update configuration if not set
+update_config() {
+  local config_name=$1
+  local config_value=$2
+  local config_line="$config_name=$config_value"
+
+  # Check if the configuration already exists
+  if grep -q "^$config_name=" "$SWAP_FILE"; then
+    # Configuration exists, update it if necessary
+    if ! grep -q "^$config_line$" "$SWAP_FILE"; then
+      echo "Updating $config_name to $config_value"
+      sed -i "s/^$config_name=.*/$config_line/" "$SWAP_FILE"
+    else
+      echo "$config_name is already set to $config_value"
+    fi
+  else
+    # Configuration does not exist, append it
+    echo "Adding $config_line to $SWAP_FILE"
+    echo "$config_line" >> "$SWAP_FILE"
+  fi
+}
+
+# Update swap size
+update_config "CONF_SWAPSIZE" "4096"
+
+# Update max swap
+update_config "CONF_MAXSWAP" "4096"
+
+# Restart swap service to apply changes
+echo "Restarting swap service to apply changes..."
+dphys-swapfile swapoff
+dphys-swapfile setup
+dphys-swapfile swapon
+
 # enable multicast on loopback device
 
 # Bring up the loopback interface
