@@ -60,7 +60,7 @@ sudo systemctl restart docker
 
 echo "Docker daemon configuration updated and Docker restarted."
 
-docker buildx bake
 docker run --privileged --rm tonistiigi/binfmt --install all
-docker buildx create --name mybuilder --use
+docker buildx create --name mybuilder --driver docker-container --use
 docker buildx inspect --bootstrap
+docker buildx use mybuilder
