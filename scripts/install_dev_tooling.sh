@@ -27,4 +27,11 @@ apt update && apt install -y \
     libopencv-core-dev \
     libgpiod-dev \
     libabsl-dev \
-    libusb-1.0-0-dev
+    libusb-1.0-0-dev \
+    plocate \
+    docker-buildx-plugin
+
+docker buildx install
+
+# add multi-arch image build support
+docker run --privileged --rm tonistiigi/binfmt --install all
