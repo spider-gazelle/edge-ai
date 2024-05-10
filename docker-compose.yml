@@ -14,18 +14,25 @@ services:
 
     volumes:
       - ./config/:/config/
+
+      # the unix pipes for IPC
+      - ./detections/:/detections/
+
+      # video recording window
+      # (record to memory so we don't wear out the HD)
       - /mnt/ramdisk:/mnt/ramdisk
+
+      # AI model storage (downloaded based on config)
       - ./model_storage/:/model_storage/
 
       # we need to map in all the USB devices
       # as edge TPU device name changes when initialized
       - /dev/bus/usb:/dev/bus/usb
-  
+
+    # General purpose IO for motion sensors and USB power toggling
     devices:
       - "/dev/gpiochip0"
-    
-    ports:
-      - "3000:3000"
+
     environment:
       SG_ENV: "production"
 
@@ -42,7 +49,11 @@ services:
     volumes:
       - ./clips/:/clips/
       - ./config/:/config/
+      - ./detections/:/detections/
       - /mnt/ramdisk:/mnt/ramdisk
+
+    ports:
+      - "3000:3000"
 
   frontend:
     image: nginx

@@ -101,10 +101,10 @@ RUN for binary in /app/bin/*; do \
 
 # Generate OpenAPI docs while we still have source code access
 RUN ./bin/interface --docs --file=openapi.yml
-RUN update-ca-certificates
 RUN mkdir ./model_storage
-RUN mkdir ./clips
+RUN mkdir ./detections
 RUN mkdir ./config
+RUN mkdir ./clips
 
 ###############################################################################
 
@@ -123,6 +123,8 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+RUN update-ca-certificates
+
 # copy the application over
 COPY --from=build /app/bin /
 
@@ -136,6 +138,7 @@ RUN ldconfig
 
 # configure folders
 COPY --from=build /app/model_storage /model_storage
+COPY --from=build /app/detections /detections
 COPY --from=build /app/config /config
 COPY --from=build /app/clips /clips
 COPY ./www /www
@@ -145,6 +148,6 @@ COPY --from=build /app/openapi.yml /openapi.yml
 
 # Run the app binding on port 3000
 EXPOSE 3000
-VOLUME ["/clips/", "/model_storage/"]
+VOLUME ["/clips/", "/model_storage/", "/detections/"]
 ENTRYPOINT ["/interface"]
 CMD ["/interface", "-b", "0.0.0.0", "-p", "3000"]
