@@ -153,7 +153,7 @@ COPY --from=build /usr/share/zoneinfo/ /usr/share/zoneinfo/
 # This is your application
 COPY --from=build /app/deps /
 COPY --from=build /app/bin /
-ENV LDFLAGS="-L/usr/local/lib"
+COPY --from=build /app/deps/usr/local/lib/* /lib/
 
 COPY --from=build /usr/bin/ffmpeg /ffmpeg
 
