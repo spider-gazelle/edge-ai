@@ -159,6 +159,8 @@ You can build an image using `docker build .`
 
 ## Deploying
 
+NOTE:: there is a `./install.sh` script that configures the following for you:
+
 Multicast is used so we can process the video in different ways without having to encode it multiple times
 
 ```shell
@@ -201,3 +203,14 @@ sudo mount -a
 ```
 
 Launch the service using: `docker-compose up -d`
+
+### Raspberry Pi
+
+After running the install script you can inspect your hardware using the following commands, typically you'd use the API to configure things however this can be useful during development:
+
+1. List video hardware: `v4l2-ctl --list-devices`
+   * Dummy video device are your loopback devices
+   * unicam (platform:3f801000.csi) is your Camera Serial Interface
+2. List USB hardware: `lsusb`
+   * Global Unichip Corp or Google is your Coral.ai TPU
+3. List GPIO lines available: `gpioinfo`

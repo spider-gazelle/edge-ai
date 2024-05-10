@@ -1,6 +1,21 @@
 FROM 84codes/crystal:latest-debian-12 as build
 WORKDIR /app
 
+# Create a non-privileged user, defaults are appuser:10001
+ARG IMAGE_UID="10001"
+ENV UID=$IMAGE_UID
+ENV USER=appuser
+
+# See https://stackoverflow.com/a/55757473/12429735
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    "${USER}"
+
 # Update system and install required packages
 RUN apt-get update && apt-get install -y \
     gnupg \
@@ -25,6 +40,7 @@ RUN apt update && apt install -y \
     git \
     wget \
     python3 \
+    ffmpeg \
     libavcodec-dev \
     libavformat-dev \
     libavutil-dev \
@@ -92,12 +108,15 @@ COPY ./src /app/src
 RUN shards build --production --error-trace -Dpreview_mt -O1
 
 # Extract binary dependencies (uncomment if not compiling a static build)
-RUN for binary in /app/bin/*; do \
+RUN for binary in "/usr/bin/ffmpeg" /app/bin/*; do \
         ldd "$binary" | \
         tr -s '[:blank:]' '\n' | \
         grep '^/' | \
         xargs -I % sh -c 'mkdir -p $(dirname deps%); cp % deps%;'; \
     done
+
+# put this in a more convienient location
+RUN cp /app/bin/libtensorflowlite_c.so /app/deps/usr/local/lib/
 
 # Generate OpenAPI docs while we still have source code access
 RUN ./bin/interface --docs --file=openapi.yml
@@ -106,42 +125,50 @@ RUN mkdir ./detections
 RUN mkdir ./config
 RUN mkdir ./clips
 
+# copy the www folder after the build
+COPY ./www /app/www
+
 ###############################################################################
 
 # Build a minimal docker image
-FROM debian:stable-slim
+FROM scratch
 WORKDIR /
 ENV PATH=$PATH:/
 
-# Update system and install required packages
-RUN apt-get update && apt-get install -y \
-    rsync \
-    ffmpeg \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Copy the user information over
+COPY --from=build etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
 
-RUN update-ca-certificates
+# These are required for communicating with external services
+# COPY --from=build /etc/hosts /etc/hosts
+# doesn't seem to exist.. I could create one?
 
-# copy the application over
+# These provide certificate chain validation where communicating with external services over TLS
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+# This is required for Timezone support
+COPY --from=build /usr/share/zoneinfo/ /usr/share/zoneinfo/
+
+# This is your application
+COPY --from=build /app/deps /
 COPY --from=build /app/bin /
-
-# copy over shared libs
-COPY --from=build /app/deps /tmp_deps
-RUN rsync -av /tmp_deps/ /
-RUN rm -rf ./tmp_deps
-RUN mv /app/bin/libtensorflowlite_c.so /usr/local/lib/
 ENV LDFLAGS="-L/usr/local/lib"
-RUN ldconfig
+
+COPY --from=build /usr/bin/ffmpeg /ffmpeg
 
 # configure folders
 COPY --from=build /app/model_storage /model_storage
 COPY --from=build /app/detections /detections
 COPY --from=build /app/config /config
 COPY --from=build /app/clips /clips
-COPY ./www /www
+COPY --from=build /app/www /www
 
 # Copy the API docs into the container
 COPY --from=build /app/openapi.yml /openapi.yml
+
+# Use an unprivileged user.
+USER appuser:appuser
 
 # Run the app binding on port 3000
 EXPOSE 3000
