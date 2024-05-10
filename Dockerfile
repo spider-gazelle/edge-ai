@@ -115,11 +115,8 @@ ENV PATH=$PATH:/
 
 # Update system and install required packages
 RUN apt-get update && apt-get install -y \
-    wget \
-    curl \
     rsync \
     ffmpeg \
-    apt-transport-https \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
