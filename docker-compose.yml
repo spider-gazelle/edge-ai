@@ -36,6 +36,13 @@ services:
     # General purpose IO for motion sensors and USB power toggling
     devices:
       - "/dev/gpiochip0"
+      - "/dev/video0:/dev/video0"
+      - "/dev/video1:/dev/video1"
+      - "/dev/video2:/dev/video2"
+      - "/dev/video3:/dev/video3"
+
+    cap_add:
+      - SYS_RAWIO
 
     environment:
       SG_ENV: "production"
