@@ -83,13 +83,13 @@ echo "================================"
 apt install -y v4l-utils v4l2loopback-dkms
 
 # Create the gpio-users group
-groupadd video-users
+groupadd video
 
 # Add the current user to the gpio-users group
-usermod -aG video-users "$CURRENT_USER"
+usermod -aG video "$CURRENT_USER"
 
 # Write the udev rule
-echo 'KERNEL=="video*", OWNER="10001", GROUP="video-users", MODE="0660"' > /etc/udev/rules.d/99-videodevice-owner.rules
+echo 'KERNEL=="video*", OWNER="10001", GROUP="video", MODE="0660"' > /etc/udev/rules.d/99-videodevice-owner.rules
 
 echo "User $CURRENT_USER video udev rule set."
 

@@ -35,7 +35,7 @@ services:
 
     # General purpose IO for motion sensors and USB power toggling
     devices:
-      - "/dev/gpiochip0"
+      - "/dev/gpiochip0:/dev/gpiochip0"
       - "/dev/video0:/dev/video0"
       - "/dev/video1:/dev/video1"
       - "/dev/video2:/dev/video2"
