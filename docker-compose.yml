@@ -5,7 +5,7 @@ services:
   processor:
     image: stakach/edge-ai
     # build: .
-    restart: unless-stopped
+    restart: always
 
     # network, host mode as we need multicast support
     container_name: processor
@@ -50,7 +50,7 @@ services:
   interface:
     image: stakach/edge-ai
     # build: .
-    restart: unless-stopped
+    restart: always
 
     # network
     container_name: interface
@@ -69,6 +69,7 @@ services:
 
   frontend:
     image: nginx
+    restart: always
 
     # has to match the other containers
     network_mode: "host"
