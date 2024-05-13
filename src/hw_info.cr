@@ -23,12 +23,30 @@ parse = OptionParser.parse(ARGV.dup) do |parser|
     show_help = false
 
     puts "\nGPIO Chips\n==================="
-    Dir.glob("/dev/gpiochip*").sort! do |path|
-      chip = GPIO::Chip.new(Path[path])
-      puts "* #{chip.name} (#{chip.label})"
-      puts "  path:  #{path}"
-      puts "  lines: #{chip.num_lines}"
+    #Dir.glob("/dev/gpiochip*").sort! do |path|
+    Dir.entries("/dev/").select(&.starts_with?("gpio")).sort!.each do |path|
+      path = "/dev/#{path}"
+      puts "* path: #{path}"
+
+      begin
+        chip = GPIO::Chip.new(Path[path])
+        puts "  #{chip.name} (#{chip.label})"
+        puts "  lines: #{chip.num_lines}"
+      rescue error
+        puts "  error: #{error.message}"
+      end
     end
+    puts ""
+  end
+
+  parser.on("-i PATH", "--inspect=PATH", "inspects the specified GPIO path") do |path|
+    show_help = false
+
+    puts "\nGPIO: #{path}\n==================="
+    chip = GPIO::Chip.new(Path[path])
+    puts "* #{chip.name} (#{chip.label})"
+    puts "  path:  #{path}"
+    puts "  lines: #{chip.num_lines}"
     puts ""
   end
 

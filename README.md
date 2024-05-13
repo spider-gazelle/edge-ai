@@ -214,3 +214,31 @@ After running the install script you can inspect your hardware using the followi
 2. List USB hardware: `lsusb`
    * Global Unichip Corp or Google is your Coral.ai TPU
 3. List GPIO lines available: `gpioinfo`
+
+### Debugging the image
+
+As we are building minimal docker images it is challenging to inspect the contents of the container. The simplest way to achieve this by mounting busy box binaries into the image
+
+* First you'll need to download compatible binaries
+
+```shell
+wget https://busybox.net/downloads/binaries/1.31.0-defconfig-multiarch-musl/busybox-armv8l
+chmod +x ./busybox-armv8l
+mkdir busybox
+mv ./busybox-armv8l ./busybox/
+```
+
+* then you can map this into the container and open a shell
+
+```shell
+docker run --rm -it \
+    -v /home/steve/busybox:/mnt \
+    --device /dev/gpiochip0 \
+    --cap-add SYS_RAWIO \
+    --entrypoint /mnt/busybox-armv8l \
+    stakach/edge-ai sh
+```
+
+* to run commands you'll need to preface them all with `/mnt/busybox-armv8l`
+
+i.e. `/mnt/busybox-armv8l ls -la /`
