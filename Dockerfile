@@ -50,14 +50,7 @@ RUN apt update && apt install -y \
     libopencv-core-dev \
     libgpiod-dev
 
-# Install shards for caching
-COPY shard.yml shard.yml
-COPY shard.override.yml shard.override.yml
-COPY shard.lock shard.lock
-
-RUN shards install --production --ignore-crystal-version --skip-postinstall --skip-executables
-
-# Compile Tensorflow lite
+# Compile Tensorflow lite (the second build in case of error)
 RUN git clone --depth 1 --branch "v2.16.1" https://github.com/tensorflow/tensorflow
 RUN mkdir tflite_build
 WORKDIR /app/tflite_build
@@ -65,10 +58,6 @@ RUN cmake ../tensorflow/tensorflow/lite/c -DTFLITE_ENABLE_GPU=ON
 RUN cmake --build . -j4 || true
 RUN echo "---------- WE ARE BUILDING AGAIN!! ----------"
 RUN cmake --build . -j1
-RUN mkdir -p ../lib/tensorflow_lite/ext
-RUN mkdir -p ../bin
-RUN cp ./libtensorflowlite_c.so ../lib/tensorflow_lite/ext/
-RUN cp ./libtensorflowlite_c.so ../bin/
 
 # Compile flatbuffers
 WORKDIR /app
@@ -95,16 +84,29 @@ RUN apt install -y libabsl-dev libusb-1.0-0-dev
 ENV LDFLAGS="-L/usr/local/lib"
 ENV TFROOT="../tensorflow"
 RUN make -f makefile_build/Makefile -j$(nproc) libedgetpu
-RUN cp ./out/direct/k8/libedgetpu.so.1.0 ../bin/libedgetpu.so
 RUN cp ./out/direct/k8/libedgetpu.so.1.0 /usr/local/lib/libedgetpu.so
 RUN cp ./out/direct/k8/libedgetpu.so.1.0 /usr/local/lib/libedgetpu.so.1
 RUN ldconfig
 
 # Add src
 WORKDIR /app
-COPY ./src /app/src
+
+# Install shards for caching
+COPY shard.yml shard.yml
+COPY shard.override.yml shard.override.yml
+COPY shard.lock shard.lock
+
+RUN shards install --production --ignore-crystal-version --skip-postinstall --skip-executables
+
+# Copy required libs for linking into place
+RUN mkdir -p ./lib/tensorflow_lite/ext
+RUN mkdir -p ./bin
+RUN cp ./libedgetpu/out/direct/k8/libedgetpu.so.1.0 ./bin/libedgetpu.so
+RUN cp ./tflite_build/libtensorflowlite_c.so ./lib/tensorflow_lite/ext/
+RUN cp ./tflite_build/libtensorflowlite_c.so ./bin/
 
 # Build application
+COPY ./src /app/src
 RUN shards build --production --error-trace -Dpreview_mt -O1
 
 # Extract binary dependencies (uncomment if not compiling a static build)

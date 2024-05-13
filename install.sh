@@ -169,6 +169,13 @@ ip link set lo up
 # Add the multicast route
 ip route add 224.0.0.0/4 dev lo
 
+# ensure configuration file has the correct permissions
+chown 10001:10001 ./config/config.yml
+
 # run the crystal lang install helper
 sudo -u "$CURRENT_USER" shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install
 ./bin/install
+
+# reboot as we need the v4l2 loopback paths to be stable
+# they initialize before hardware typically
+reboot

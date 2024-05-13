@@ -23,9 +23,7 @@ parse = OptionParser.parse(ARGV.dup) do |parser|
     show_help = false
 
     puts "\nGPIO Chips\n==================="
-    #Dir.glob("/dev/gpiochip*").sort! do |path|
-    Dir.entries("/dev/").select(&.starts_with?("gpio")).sort!.each do |path|
-      path = "/dev/#{path}"
+    Dir.glob("/dev/gpiochip*").sort!.each do |path|
       puts "* path: #{path}"
 
       begin
@@ -99,7 +97,7 @@ parse = OptionParser.parse(ARGV.dup) do |parser|
           video.close
         end
       rescue error
-        puts "* #{dev_path} (#{error.message})"
+        puts "\n* #{dev_path} (#{error.message})"
       end
     end
   end
