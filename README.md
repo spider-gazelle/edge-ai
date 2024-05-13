@@ -232,13 +232,20 @@ mv ./busybox-armv8l ./busybox/
 
 ```shell
 docker run --rm -it \
-    -v /home/steve/busybox:/mnt \
+    -v /home/steve/busybox:/busybox \
     --device /dev/gpiochip0 \
     --cap-add SYS_RAWIO \
-    --entrypoint /mnt/busybox-armv8l \
+    --entrypoint /busybox/busybox-armv8l \
     stakach/edge-ai sh
 ```
 
-* to run commands you'll need to preface them all with `/mnt/busybox-armv8l`
+OR editing docker-compose.yml
 
-i.e. `/mnt/busybox-armv8l ls -la /`
+```yml
+    volumes:
+      - ./busybox/:/busybox/
+```
+
+* to run commands you'll need to preface them all with `/busybox/busybox-armv8l` etc
+
+i.e. `/busybox/busybox-armv8l ls -la /`

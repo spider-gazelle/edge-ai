@@ -63,6 +63,18 @@ services:
       - ./detections/:/detections/
       - /mnt/ramdisk:/mnt/ramdisk
 
+      # we need to map in all the USB devices
+      # as edge TPU device name changes when initialized
+      - /dev/bus/usb:/dev/bus/usb
+
+    # General purpose IO for motion sensors and USB power toggling
+    devices:
+      - "/dev/gpiochip0:/dev/gpiochip0"
+      - "/dev/video0:/dev/video0"
+      - "/dev/video1:/dev/video1"
+      - "/dev/video2:/dev/video2"
+      - "/dev/video3:/dev/video3"
+
     # Not required when using host network mode
     # ports:
     #  - "3000:3000"
