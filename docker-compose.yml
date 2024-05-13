@@ -69,6 +69,9 @@ services:
 
   frontend:
     image: nginx
+
+    # has to match the other containers
+    network_mode: "host"
     container_name: frontend
     hostname: frontend
     depends_on:
