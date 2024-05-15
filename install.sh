@@ -171,6 +171,7 @@ ip route add 224.0.0.0/4 dev lo
 
 # ensure configuration file has the correct permissions
 chown 10001:10001 ./config/config.yml
+chown 10001:10001 ./detections
 
 # run the crystal lang install helper
 sudo -u "$CURRENT_USER" shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install

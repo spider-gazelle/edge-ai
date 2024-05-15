@@ -51,7 +51,7 @@
         throw 'ID parameter is not present in the URL';
     }
 
-    const streamURL = window.location.origin.replace('http', 'ws') + '/api/edge/ai/monitor/stream/' + id_value;
+    const streamURL = window.location.origin.replace('http', 'ws') + '/api/edge/ai/monitor/' + id_value + '/stream';
     var player = null;
 
     const configure_player = function() {
@@ -191,7 +191,7 @@
     update_rect();
 
     // Create a WebSocket connection
-    const detectionsURL = window.location.origin.replace('http', 'ws') + '/api/edge/ai/monitor/detections/' + id_value;
+    const detectionsURL = window.location.origin.replace('http', 'ws') + '/api/edge/ai/monitor/' + id_value + '/detections';
     const ws = new WebSocket(detectionsURL);
     // Listen for messages from the server
     ws.onmessage = function(event) {
