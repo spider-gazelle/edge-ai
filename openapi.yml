@@ -1,0 +1,1495 @@
+---
+openapi: 3.0.3
+info:
+  description: API routes
+  title: Edge-AI
+  version: 1.0.0
+paths:
+  /api/edge/ai/clips/{id}:
+    get:
+      summary: list clips saved on the device, optionally filtering by stream id
+      tags:
+      - Clips
+      operationId: EdgeAI::Clips_index
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: false
+        schema:
+          type: string
+          nullable: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &1
+              schema:
+                $ref: '#/components/schemas/_Array_EdgeAI__Clips__Metadata____Array_String__'
+            application/yaml: *1
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &2
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *2
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &3
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *3
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &4
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *4
+        400:
+          description: Bad Request
+          content:
+            application/json: &5
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *5
+        404:
+          description: Not Found
+          content:
+            application/json: &6
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *6
+    post:
+      summary: save a new clip to the device with the associated JSON payload
+      tags:
+      - Clips
+      operationId: EdgeAI::Clips_create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JSON__Any'
+        required: true
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+          nullable: true
+      - name: seconds_before
+        in: query
+        description: the number of seconds to grab before now
+        example: "3"
+        required: false
+        schema:
+          type: integer
+          format: UInt32
+      - name: seconds_after
+        in: query
+        description: the number of seconds to grab after now
+        example: "3"
+        required: false
+        schema:
+          type: integer
+          format: UInt32
+      responses:
+        201:
+          description: Created
+          content:
+            application/json: &7
+              schema:
+                $ref: '#/components/schemas/EdgeAI__Clips__Metadata'
+            application/yaml: *7
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &8
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *8
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &9
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *9
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &10
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *10
+        400:
+          description: Bad Request
+          content:
+            application/json: &11
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *11
+        404:
+          description: Not Found
+          content:
+            application/json: &12
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *12
+  /api/edge/ai/clips/{id}/{timestamp}:
+    get:
+      summary: download the clip specified by the timestamp
+      tags:
+      - Clips
+      operationId: EdgeAI::Clips_show
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+          nullable: true
+      - name: timestamp
+        in: path
+        description: the timestamp of the clip to download
+        example: "123456"
+        required: true
+        schema:
+          type: integer
+          format: Int64
+      responses:
+        200:
+          description: OK
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &13
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *13
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &14
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *14
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &15
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *15
+        400:
+          description: Bad Request
+          content:
+            application/json: &16
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *16
+        404:
+          description: Not Found
+          content:
+            application/json: &17
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *17
+    delete:
+      summary: delete a clip from storage
+      tags:
+      - Clips
+      operationId: EdgeAI::Clips_destroy
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+          nullable: true
+      - name: timestamp
+        in: path
+        description: the timestamp of the clip to delete
+        example: "123456"
+        required: true
+        schema:
+          type: integer
+          format: Int64
+      responses:
+        202:
+          description: Accepted
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &18
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *18
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &19
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *19
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &20
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *20
+        400:
+          description: Bad Request
+          content:
+            application/json: &21
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *21
+        404:
+          description: Not Found
+          content:
+            application/json: &22
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *22
+  /api/edge/ai/clips/{id}/{timestamp}/thumbnail:
+    get:
+      tags:
+      - Clips
+      operationId: EdgeAI::Clips_thumbnail
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+          nullable: true
+      - name: timestamp
+        in: path
+        description: the timestamp of the thumbnail to display
+        example: "123456"
+        required: true
+        schema:
+          type: integer
+          format: Int64
+      responses:
+        200:
+          description: OK
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &23
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *23
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &24
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *24
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &25
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *25
+        400:
+          description: Bad Request
+          content:
+            application/json: &26
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *26
+        404:
+          description: Not Found
+          content:
+            application/json: &27
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *27
+  /api/edge/ai/clips/{id}/replay:
+    get:
+      summary: obtains a clip of the event
+      tags:
+      - Clips
+      operationId: EdgeAI::Clips_replay
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+          nullable: true
+      - name: seconds_before
+        in: query
+        description: the number of seconds to grab before now
+        example: "3"
+        required: false
+        schema:
+          type: integer
+          format: UInt32
+      - name: seconds_after
+        in: query
+        description: the number of seconds to grab after now
+        example: "3"
+        required: false
+        schema:
+          type: integer
+          format: UInt32
+      responses:
+        200:
+          description: OK
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &28
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *28
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &29
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *29
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &30
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *30
+        400:
+          description: Bad Request
+          content:
+            application/json: &31
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *31
+        404:
+          description: Not Found
+          content:
+            application/json: &32
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *32
+  /api/edge/ai/config:
+    summary: methods for viewing and updating the configuration of the device
+    get:
+      summary: view the current configuration
+      tags:
+      - Configuration
+      operationId: EdgeAI::Configuration_index
+      parameters: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &33
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TensorflowLite__Pipeline__Configuration__Pipeline'
+            application/yaml: *33
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &34
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *34
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &35
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *35
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &36
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *36
+        400:
+          description: Bad Request
+          content:
+            application/json: &37
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *37
+        404:
+          description: Not Found
+          content:
+            application/json: &38
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *38
+    post:
+      summary: add a new video pipeline
+      tags:
+      - Configuration
+      operationId: EdgeAI::Configuration_create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TensorflowLite__Pipeline__Configuration__Pipeline'
+        required: true
+      parameters: []
+      responses:
+        201:
+          description: Created
+          content:
+            application/json: &39
+              schema:
+                $ref: '#/components/schemas/TensorflowLite__Pipeline__Configuration__Pipeline'
+            application/yaml: *39
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &40
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *40
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &41
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *41
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &42
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *42
+        400:
+          description: Bad Request
+          content:
+            application/json: &43
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *43
+        404:
+          description: Not Found
+          content:
+            application/json: &44
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *44
+  /api/edge/ai/config/clear:
+    summary: methods for viewing and updating the configuration of the device
+    post:
+      summary: clear the current configurations
+      tags:
+      - Configuration
+      operationId: EdgeAI::Configuration_clear_all
+      parameters: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &45
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/String'
+            application/yaml: *45
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &46
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *46
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &47
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *47
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &48
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *48
+        400:
+          description: Bad Request
+          content:
+            application/json: &49
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *49
+        404:
+          description: Not Found
+          content:
+            application/json: &50
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *50
+  /api/edge/ai/config/{id}:
+    summary: methods for viewing and updating the configuration of the device
+    get:
+      summary: view the current configuration
+      tags:
+      - Configuration
+      operationId: EdgeAI::Configuration_show
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &51
+              schema:
+                $ref: '#/components/schemas/TensorflowLite__Pipeline__Configuration__Pipeline'
+            application/yaml: *51
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &52
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *52
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &53
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *53
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &54
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *54
+        400:
+          description: Bad Request
+          content:
+            application/json: &55
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *55
+        404:
+          description: Not Found
+          content:
+            application/json: &56
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *56
+    put:
+      summary: replace the configuration with new configuration
+      tags:
+      - Configuration
+      operationId: EdgeAI::Configuration_update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TensorflowLite__Pipeline__Configuration__Pipeline'
+        required: true
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &57
+              schema:
+                $ref: '#/components/schemas/TensorflowLite__Pipeline__Configuration__Pipeline'
+            application/yaml: *57
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &58
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *58
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &59
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *59
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &60
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *60
+        400:
+          description: Bad Request
+          content:
+            application/json: &61
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *61
+        404:
+          description: Not Found
+          content:
+            application/json: &62
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *62
+    delete:
+      summary: remove a pipeline from the device
+      tags:
+      - Configuration
+      operationId: EdgeAI::Configuration_destroy
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+      responses:
+        202:
+          description: Accepted
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &63
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *63
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &64
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *64
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &65
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *65
+        400:
+          description: Bad Request
+          content:
+            application/json: &66
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *66
+        404:
+          description: Not Found
+          content:
+            application/json: &67
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *67
+  /api/edge/ai/devices/video:
+    summary: details of any devices that are connected to the system
+    get:
+      summary: list the local video devices and their capabilities
+      tags:
+      - Devices
+      operationId: EdgeAI::Devices_video_devices
+      parameters: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &68
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdgeAI__Devices__VideoDevice'
+            application/yaml: *68
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &69
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *69
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &70
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *70
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &71
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *71
+        400:
+          description: Bad Request
+          content:
+            application/json: &72
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *72
+        404:
+          description: Not Found
+          content:
+            application/json: &73
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *73
+  /api/edge/ai/devices/tpu:
+    summary: details of any devices that are connected to the system
+    get:
+      summary: list the available TPUs
+      tags:
+      - Devices
+      operationId: EdgeAI::Devices_tpu_devices
+      parameters: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &74
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NamedTuple_type__String__path__String_'
+            application/yaml: *74
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &75
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *75
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &76
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *76
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &77
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *77
+        400:
+          description: Bad Request
+          content:
+            application/json: &78
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *78
+        404:
+          description: Not Found
+          content:
+            application/json: &79
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *79
+  /api/edge/ai/devices/gpio:
+    summary: details of any devices that are connected to the system
+    get:
+      summary: list the available general purpose input outputs
+      tags:
+      - Devices
+      operationId: EdgeAI::Devices_gpio_lines
+      parameters: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &80
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdgeAI__Devices__GPIOLines'
+            application/yaml: *80
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &81
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *81
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &82
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *82
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &83
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *83
+        400:
+          description: Bad Request
+          content:
+            application/json: &84
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *84
+        404:
+          description: Not Found
+          content:
+            application/json: &85
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *85
+  /api/edge/ai/monitor/{id}/stream:
+    get:
+      summary: pushes the video stream down the websocket
+      tags:
+      - Monitor
+      operationId: EdgeAI::Monitor_stream
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+      responses:
+        101:
+          description: Switching Protocols
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &86
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *86
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &87
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *87
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &88
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *88
+        400:
+          description: Bad Request
+          content:
+            application/json: &89
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *89
+        404:
+          description: Not Found
+          content:
+            application/json: &90
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *90
+  /api/edge/ai/monitor/{id}/detections:
+    get:
+      summary: pushes detections found in the video stream in realtime to connected
+        sockets
+      tags:
+      - Monitor
+      operationId: EdgeAI::Monitor_detect
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+      responses:
+        101:
+          description: Switching Protocols
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &91
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *91
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &92
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *92
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &93
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *93
+        400:
+          description: Bad Request
+          content:
+            application/json: &94
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *94
+        404:
+          description: Not Found
+          content:
+            application/json: &95
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *95
+  /api/edge/ai/status:
+    get:
+      summary: status of all configured pipelines
+      tags:
+      - Status
+      operationId: EdgeAI::Status_index
+      parameters: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &96
+              schema:
+                $ref: '#/components/schemas/Hash_String__PipelineStatus_'
+            application/yaml: *96
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &97
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *97
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &98
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *98
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &99
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *99
+        400:
+          description: Bad Request
+          content:
+            application/json: &100
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *100
+        404:
+          description: Not Found
+          content:
+            application/json: &101
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *101
+  /api/edge/ai/status/{id}:
+    get:
+      summary: status of the specified pipeline
+      tags:
+      - Status
+      operationId: EdgeAI::Status_show
+      parameters:
+      - name: id
+        in: path
+        description: the id of the video stream
+        example: ba714f86-cac6-42c7-8956-bcf5105e1b81
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &102
+              schema:
+                $ref: '#/components/schemas/PipelineStatus'
+            application/yaml: *102
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &103
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *103
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &104
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *104
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &105
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *105
+        400:
+          description: Bad Request
+          content:
+            application/json: &106
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *106
+        404:
+          description: Not Found
+          content:
+            application/json: &107
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *107
+  /api/edge/ai/openapi:
+    get:
+      summary: returns the OpenAPI representation of this service
+      tags:
+      - Status
+      operationId: EdgeAI::Status_openapi
+      parameters: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: &108
+              schema:
+                $ref: '#/components/schemas/YAML__Any'
+            application/yaml: *108
+        406:
+          description: Not Acceptable
+          content:
+            application/json: &109
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *109
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json: &110
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ContentResponse'
+            application/yaml: *110
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json: &111
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *111
+        400:
+          description: Bad Request
+          content:
+            application/json: &112
+              schema:
+                $ref: '#/components/schemas/ActionController__Error__ParameterResponse'
+            application/yaml: *112
+        404:
+          description: Not Found
+          content:
+            application/json: &113
+              schema:
+                $ref: '#/components/schemas/NamedTuple_error__String___Nil_'
+            application/yaml: *113
+components:
+  schemas:
+    _Array_EdgeAI__Clips__Metadata____Array_String__:
+      type: array
+    JSON__Any:
+      type: object
+    EdgeAI__Clips__Metadata:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: Int64
+        viewed:
+          type: boolean
+        metadata:
+          type: object
+      required:
+      - timestamp
+      - viewed
+      - metadata
+    TensorflowLite__Pipeline__Configuration__Pipeline:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        async:
+          type: boolean
+        track_objects:
+          type: boolean
+        input:
+          type: object
+        output:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                - object_detection
+                - image_classification
+                - image_segmentation
+                - pose_detection
+                - face_detection
+                - age_estimation
+                - gender_estimation
+              model_uri:
+                type: string
+              label_uri:
+                type: string
+                nullable: true
+              scaling_mode:
+                type: string
+                enum:
+                - fit
+                - cover
+              min_score:
+                type: number
+                format: Float32
+              tpu_delegate:
+                type: string
+                nullable: true
+              gpu_delegate:
+                type: boolean
+              strides:
+                type: array
+                items:
+                  type: integer
+                  format: Int32
+                nullable: true
+              age_ranges:
+                type: array
+                items:
+                  type: integer
+                  format: Int32
+                nullable: true
+              match_label:
+                type: string
+                nullable: true
+              pipeline:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - object_detection
+                      - image_classification
+                      - image_segmentation
+                      - pose_detection
+                      - face_detection
+                      - age_estimation
+                      - gender_estimation
+                    model_uri:
+                      type: string
+                    label_uri:
+                      type: string
+                      nullable: true
+                    scaling_mode:
+                      type: string
+                      enum:
+                      - fit
+                      - cover
+                    min_score:
+                      type: number
+                      format: Float32
+                    tpu_delegate:
+                      type: string
+                      nullable: true
+                    gpu_delegate:
+                      type: boolean
+                    strides:
+                      type: array
+                      items:
+                        type: integer
+                        format: Int32
+                      nullable: true
+                    age_ranges:
+                      type: array
+                      items:
+                        type: integer
+                        format: Int32
+                      nullable: true
+                    match_label:
+                      type: string
+                      nullable: true
+                  required:
+                  - type
+                  - model_uri
+                  - scaling_mode
+                  - min_score
+                  - gpu_delegate
+            required:
+            - type
+            - model_uri
+            - scaling_mode
+            - min_score
+            - gpu_delegate
+            - pipeline
+        id:
+          type: string
+          nullable: true
+        updated:
+          type: string
+          format: date-time
+          nullable: true
+        webhook_uri:
+          type: string
+          nullable: true
+        mqtt_uri:
+          type: string
+          nullable: true
+        motion_detector:
+          type: object
+          properties:
+            chip:
+              type: string
+            line:
+              type: integer
+              format: Int32
+          required:
+          - chip
+          - line
+          nullable: true
+        motion_active_seconds:
+          type: integer
+          format: Int32
+          nullable: true
+        motion_debounce_seconds:
+          type: integer
+          format: Int32
+          nullable: true
+        motion_trigger_output:
+          type: array
+          items:
+            type: object
+            properties:
+              chip:
+                type: string
+              line:
+                type: integer
+                format: Int32
+            required:
+            - chip
+            - line
+          nullable: true
+      required:
+      - name
+      - async
+      - track_objects
+      - input
+      - output
+    String:
+      type: string
+    EdgeAI__Devices__VideoDevice:
+      type: object
+      properties:
+        path:
+          type: string
+        name:
+          type: string
+        driver:
+          type: string
+        formats:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              resolutions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    width:
+                      type: integer
+                      format: UInt32
+                    height:
+                      type: integer
+                      format: UInt32
+                    fps:
+                      type: number
+                      format: Float64
+                    type:
+                      type: string
+                      enum:
+                      - discrete
+                      - continuous
+                      - stepwise
+                  required:
+                  - width
+                  - height
+                  - fps
+                  - type
+            required:
+            - code
+            - resolutions
+      required:
+      - path
+      - name
+      - driver
+      - formats
+    NamedTuple_type__String__path__String_:
+      type: object
+      properties:
+        type:
+          type: string
+        path:
+          type: string
+      required:
+      - type
+      - path
+    EdgeAI__Devices__GPIOLines:
+      type: object
+      properties:
+        name:
+          type: string
+        label:
+          type: string
+        lines:
+          type: integer
+          format: UInt32
+      required:
+      - name
+      - label
+      - lines
+    Hash_String__PipelineStatus_:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          errors:
+            type: object
+            additionalProperties:
+              type: string
+          warnings:
+            type: object
+            additionalProperties:
+              type: string
+          status_available:
+            type: boolean
+          last_updated:
+            type: string
+            format: date-time
+        required:
+        - errors
+        - warnings
+        - status_available
+        - last_updated
+    PipelineStatus:
+      type: object
+      properties:
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+        warnings:
+          type: object
+          additionalProperties:
+            type: string
+        status_available:
+          type: boolean
+        last_updated:
+          type: string
+          format: date-time
+      required:
+      - errors
+      - warnings
+      - status_available
+      - last_updated
+    YAML__Any:
+      type: object
+    ActionController__Error__ContentResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        accepts:
+          type: array
+          items:
+            type: string
+          nullable: true
+      required:
+      - error
+    ActionController__Error__ParameterResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        parameter:
+          type: string
+          nullable: true
+        restriction:
+          type: string
+          nullable: true
+      required:
+      - error
+    NamedTuple_error__String___Nil_:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
