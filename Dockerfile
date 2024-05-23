@@ -114,6 +114,7 @@ COPY --from=build /app/bin /
 COPY --from=build /app/deps/usr/local/lib/* /lib/
 COPY --from=build /app/bin/libtensorflowlite_c.so /lib/libtensorflowlite_c.so
 COPY --from=build /app/bin/libtensorflowlite_gpu_delegate.so /lib/libtensorflowlite_gpu_delegate.so
+COPY --from=tflite /usr/local/lib/libOpenCL.so /lib/libOpenCL.so
 
 COPY --from=build /usr/bin/ffmpeg /ffmpeg
 
