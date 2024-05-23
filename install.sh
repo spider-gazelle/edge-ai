@@ -170,6 +170,7 @@ ip link set lo up
 ip route add 224.0.0.0/4 dev lo
 
 # ensure configuration file has the correct permissions
+# NOTE:: ramdisk automatically has chmod 777 permissions
 chown 10001:10001 ./config/config.yml
 chown 10001:10001 ./detections
 

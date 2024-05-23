@@ -25,8 +25,8 @@ dependencies:
     github: spider-gazelle/tasker
 
 development_dependencies:
-  ameba:
-    github: veelenga/ameba
+  # ameba:
+  #  github: veelenga/ameba
   hot_topic:
     github: jgaskins/hot_topic
 

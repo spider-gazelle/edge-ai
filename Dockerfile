@@ -1,3 +1,4 @@
+FROM stakach/tensorflowlite:latest as tflite
 FROM 84codes/crystal:latest-debian-12 as build
 WORKDIR /app
 
@@ -16,24 +17,12 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
-# Update system and install required packages
-RUN apt-get update && apt-get install -y \
-    gnupg \
-    wget \
-    curl \
-    apt-transport-https \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Add Google Cloud public key
-RUN wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/coral-edgetpu.gpg
-
-# Add Coral packages repository
-RUN echo "deb [signed-by=/etc/apt/trusted.gpg.d/coral-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
-
 # Add dependencies commonly required for building crystal applications
 # hadolint ignore=DL3018
-RUN apt update && apt install -y \
+RUN apt-get update && apt-get install -y \
+    gnupg \
+    curl \
+    apt-transport-https \
     build-essential \
     cmake \
     linux-headers-generic \
@@ -46,49 +35,11 @@ RUN apt update && apt install -y \
     libavutil-dev \
     libswscale-dev \
     ca-certificates \
-    opencl-headers \
-    libopencv-core-dev \
-    libgpiod-dev
+    libgpiod-dev \
+    libabsl-dev \
+    libusb-1.0-0-dev && \
+    apt-get clean
 
-# Compile Tensorflow lite (the second build in case of error)
-RUN git clone --depth 1 --branch "v2.16.1" https://github.com/tensorflow/tensorflow
-RUN mkdir tflite_build
-WORKDIR /app/tflite_build
-RUN cmake ../tensorflow/tensorflow/lite/c -DTFLITE_ENABLE_GPU=ON
-RUN cmake --build . -j4 || true
-RUN echo "---------- WE ARE BUILDING AGAIN!! ----------"
-RUN cmake --build . -j1
-
-# Compile flatbuffers
-WORKDIR /app
-RUN git clone --branch v23.5.26 --depth 1 https://github.com/google/flatbuffers
-WORKDIR /app/flatbuffers
-RUN cmake -G "Unix Makefiles" \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DFLATBUFFERS_BUILD_SHAREDLIB:BOOL=ON
-RUN make && make install
-
-# Compile libedgetpu
-WORKDIR /app
-RUN git clone https://github.com/google-coral/libedgetpu
-WORKDIR /app/libedgetpu
-
-# TODO:: remove once https://github.com/google-coral/libedgetpu/pull/66 is merged
-RUN git remote add upstream https://github.com/NobuoTsukamoto/libedgetpu
-RUN git fetch upstream
-RUN git config --global user.email "example@example.com"
-RUN git config --global user.name "Your Name"
-RUN git cherry-pick dff851aa3124afce5f7d149c843d82b14c05c075
-
-RUN apt install -y libabsl-dev libusb-1.0-0-dev
-ENV LDFLAGS="-L/usr/local/lib"
-ENV TFROOT="../tensorflow"
-RUN make -f makefile_build/Makefile -j$(nproc) libedgetpu
-RUN cp ./out/direct/k8/libedgetpu.so.1.0 /usr/local/lib/libedgetpu.so
-RUN cp ./out/direct/k8/libedgetpu.so.1.0 /usr/local/lib/libedgetpu.so.1
-RUN ldconfig
-
-# Add src
 WORKDIR /app
 
 # Install shards for caching
@@ -99,11 +50,19 @@ COPY shard.lock shard.lock
 RUN shards install --production --ignore-crystal-version --skip-postinstall --skip-executables
 
 # Copy required libs for linking into place
+ENV LDFLAGS="-L/usr/local/lib"
+COPY --from=tflite /usr/local/lib/libedgetpu.so /usr/local/lib/libedgetpu.so
+COPY --from=tflite /usr/local/lib/libtensorflowlite_c.so /usr/local/lib/libtensorflowlite_c.so
+COPY --from=tflite /usr/local/lib/libtensorflowlite_gpu_delegate.so /usr/local/lib/libtensorflowlite_gpu_delegate.so
+RUN ldconfig
+
 RUN mkdir -p ./lib/tensorflow_lite/ext
 RUN mkdir -p ./bin
-RUN cp ./libedgetpu/out/direct/k8/libedgetpu.so.1.0 ./bin/libedgetpu.so
-RUN cp ./tflite_build/libtensorflowlite_c.so ./lib/tensorflow_lite/ext/
-RUN cp ./tflite_build/libtensorflowlite_c.so ./bin/
+RUN cp /usr/local/lib/libtensorflowlite_c.so /app/lib/tensorflow_lite/ext/libtensorflowlite_c.so
+RUN cp /usr/local/lib/libtensorflowlite_c.so /app/bin/libtensorflowlite_c.so
+
+RUN cp /usr/local/lib/libtensorflowlite_gpu_delegate.so /app/lib/tensorflow_lite/ext/libtensorflowlite_gpu_delegate.so
+RUN cp /usr/local/lib/libtensorflowlite_gpu_delegate.so /app/bin/libtensorflowlite_gpu_delegate.so
 
 # Build application
 COPY ./src /app/src
@@ -116,9 +75,6 @@ RUN for binary in "/usr/bin/ffmpeg" /app/bin/*; do \
         grep '^/' | \
         xargs -I % sh -c 'mkdir -p $(dirname deps%); cp % deps%;'; \
     done
-
-# put this in a more convienient location
-RUN cp /app/bin/libtensorflowlite_c.so /app/deps/usr/local/lib/
 
 # Generate OpenAPI docs while we still have source code access
 RUN ./bin/interface --docs --file=openapi.yml
@@ -156,6 +112,8 @@ COPY --from=build /usr/share/zoneinfo/ /usr/share/zoneinfo/
 COPY --from=build /app/deps /
 COPY --from=build /app/bin /
 COPY --from=build /app/deps/usr/local/lib/* /lib/
+COPY --from=build /app/bin/libtensorflowlite_c.so /lib/libtensorflowlite_c.so
+COPY --from=build /app/bin/libtensorflowlite_gpu_delegate.so /lib/libtensorflowlite_gpu_delegate.so
 
 COPY --from=build /usr/bin/ffmpeg /ffmpeg
 

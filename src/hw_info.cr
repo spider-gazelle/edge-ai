@@ -1,9 +1,25 @@
+require "tensorflow_lite"
 require "tensorflow_lite/edge_tpu"
 require "option_parser"
+require "http"
 require "v4l2"
 require "gpio"
 
 show_help = true
+
+gpu_test = {
+  {input: {0.0_f32, 0.0_f32}, result: 0},
+  {input: {1.0_f32, 0.0_f32}, result: 1},
+  {input: {0.0_f32, 1.0_f32}, result: 1},
+  {input: {1.0_f32, 1.0_f32}, result: 0},
+}
+
+tpu_test = {
+  {input: {-128_i8, -128_i8}, result: 0},
+  {input: {127_i8, -128_i8}, result: 1},
+  {input: {-128_i8, 127_i8}, result: 1},
+  {input: {127_i8, 127_i8}, result: 0},
+}
 
 parse = OptionParser.parse(ARGV.dup) do |parser|
   parser.banner = "Usage: #{PROGRAM_NAME} [arguments]"
@@ -17,6 +33,81 @@ parse = OptionParser.parse(ARGV.dup) do |parser|
       puts "  #{dev.path}"
     end
     puts ""
+  end
+
+  parser.on("--test-tpu=INDEX", "tensorflow coral.ai delegate testing") do |index|
+    show_help = false
+    puts "TPU Delegate Test\n================="
+
+    if delegate = TensorflowLite::EdgeTPU.devices[index.to_i]?.try(&.to_delegate)
+      puts "  downloading model..."
+      client = TensorflowLite::Client.new(
+        URI.parse("https://raw.githubusercontent.com/spider-gazelle/tensorflow_lite/main/spec/test_data/xor_model_quantized_edgetpu.tflite"),
+        delegate: delegate
+      )
+
+      puts "  running test..."
+      tpu_test.each do |test|
+        inputs = test[:input]
+        expected = test[:result]
+
+        # configure inputs
+        ints = client[0].as_i8
+        ints[0], ints[1] = inputs
+
+        # run through NN
+        client.invoke!
+
+        # check results
+        ints = client.output.as_i8
+        result = ints[0] >= 0_i8 ? 1 : 0
+
+        if result != expected
+          puts "  test failed :("
+          break
+        end
+      end
+
+      puts "  test complete!"
+    else
+      puts "  no TPU at index #{index}, num devices #{TensorflowLite::EdgeTPU.devices.size}"
+    end
+  end
+
+  parser.on("--test-gpu", "tensorflow gpu delegate testing") do
+    show_help = false
+
+    # it will fallback to CPU for this test if there is no hardware installed
+    puts "\nGPU Delegate Test\n================="
+    puts "  downloading model..."
+    client = TensorflowLite::Client.new(
+      URI.parse("https://raw.githubusercontent.com/spider-gazelle/tensorflow_lite/main/spec/test_data/xor_model.tflite"),
+      delegate: TensorflowLite::DelegateGPU.new
+    )
+
+    puts "  running test..."
+    gpu_test.each do |test|
+      inputs = test[:input]
+      expected = test[:result]
+
+      # configure inputs
+      floats = client[0].as_f32
+      floats[0], floats[1] = inputs
+
+      # run through NN
+      client.invoke!
+
+      # check results
+      floats = client.output.as_f32
+      result = (floats[0] + 0.5_f32).to_i
+
+      if result != expected
+        puts "  test failed :("
+        break
+      end
+    end
+
+    puts "  test complete!"
   end
 
   parser.on("-g", "--gpio", "List the General Purpose Input Output chips available") do
