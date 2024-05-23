@@ -60,13 +60,9 @@ services:
       # as edge TPU device name changes when initialized
       - /dev/:/dev/
 
-    # General purpose IO for motion sensors and USB power toggling
-    devices:
-      - "/dev/gpiochip0:/dev/gpiochip0"
-      - "/dev/video0:/dev/video0"
-      - "/dev/video1:/dev/video1"
-      - "/dev/video2:/dev/video2"
-      - "/dev/video3:/dev/video3"
+    # required to inspect GPIO chips
+    cap_add:
+      - SYS_RAWIO
 
     # Not required when using host network mode
     # ports:
