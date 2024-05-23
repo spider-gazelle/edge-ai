@@ -204,6 +204,14 @@ sudo mount -a
 
 Launch the service using: `docker-compose up -d`
 
+### Testing deployment
+
+The following helpers are available to inspect hardware and test permissions:
+
+* list detected hardware: `docker exec -it processor ./hw_info -v -t -g`
+* check TPU in container: `docker exec -it processor ./hw_info --test-tpu=0`
+* check GPU in container: `docker exec -it processor ./hw_info --test-gpu`
+
 ### Raspberry Pi
 
 After running the install script you can inspect your hardware using the following commands, typically you'd use the API to configure things however this can be useful during development:
