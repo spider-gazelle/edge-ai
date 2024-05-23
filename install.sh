@@ -76,6 +76,9 @@ apt update
 apt install -y usbutils libedgetpu-dev libedgetpu1-std
 systemctl restart udev
 
+# Write the udev rule
+echo 'SUBSYSTEM=="usb", OWNER="10001", MODE="0660"' > /etc/udev/rules.d/99-usb.rules
+
 # install video for linux 2
 echo "================================"
 echo "===Installing Video for Linux==="

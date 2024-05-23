@@ -31,18 +31,11 @@ services:
 
       # we need to map in all the USB devices
       # as edge TPU device name changes when initialized
-      - /dev/bus/usb:/dev/bus/usb
+      - /dev/:/dev/
 
-    # General purpose IO for motion sensors and USB power toggling
-    devices:
-      - "/dev/gpiochip0:/dev/gpiochip0"
-      - "/dev/video0:/dev/video0"
-      - "/dev/video1:/dev/video1"
-      - "/dev/video2:/dev/video2"
-      - "/dev/video3:/dev/video3"
-
-    cap_add:
-      - SYS_RAWIO
+    # mapping dev and configuring privileged access is
+    # the simplest way to support a wide range of hardware
+    privileged: true
 
     environment:
       SG_ENV: "production"
@@ -65,7 +58,7 @@ services:
 
       # we need to map in all the USB devices
       # as edge TPU device name changes when initialized
-      - /dev/bus/usb:/dev/bus/usb
+      - /dev/:/dev/
 
     # General purpose IO for motion sensors and USB power toggling
     devices:
