@@ -60,6 +60,10 @@ services:
       # as edge TPU device name changes when initialized
       - /dev/:/dev/
 
+    # required to open GPIO chips
+    devices:
+      - "/dev/gpiochip0:/dev/gpiochip0"
+
     # required to inspect GPIO chips
     cap_add:
       - SYS_RAWIO

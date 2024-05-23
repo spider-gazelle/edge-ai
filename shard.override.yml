@@ -1,4 +1,0 @@
-dependencies:
-  tensorflow_lite:
-    github: spider-gazelle/tensorflow_lite
-    branch: main

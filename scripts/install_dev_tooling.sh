@@ -24,6 +24,8 @@ apt update && apt install -y \
     libswscale-dev \
     ca-certificates \
     opencl-headers \
+    clinfo \
+    ocl-icd-opencl-dev \
     libopencv-core-dev \
     libgpiod-dev \
     libabsl-dev \
