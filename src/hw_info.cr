@@ -170,14 +170,35 @@ parse = OptionParser.parse(ARGV.dup) do |parser|
                 str << "\n  - "
                 str << pixel.code
                 pixel.frame_sizes.each do |size|
-                  rate = size.frame_rate
-                  str << "\n    "
-                  rate.width.to_s(str)
-                  str << "x"
-                  rate.height.to_s(str)
-                  str << " ("
-                  rate.fps.round(1).to_s(str)
-                  str << "fps) ["
+                  if size.type.discrete?
+                    rate = size.frame_rate
+                    str << "\n    "
+                    rate.width.to_s(str)
+                    str << "x"
+                    rate.height.to_s(str)
+                    str << " ("
+                    rate.fps.round(1).to_s(str)
+                    str << "fps)"
+                  else
+                    str << "\n    "
+                    size.max_width.to_s(str)
+                    str << "x"
+                    size.max_height.to_s(str)
+                    if size.type.stepwise?
+                      str << " ("
+                      if size.step_width == size.step_height
+                        size.step_width.to_s(str)
+                        str << "px step)"
+                      else
+                        size.step_width.to_s(str)
+                        str << "w "
+                        size.step_height.to_s(str)
+                        str << "h step)"
+                      end
+                    end
+                  end
+
+                  str << " ["
                   str << size.type
                   str << "]"
                 end
