@@ -189,6 +189,9 @@ parse = OptionParser.parse(ARGV.dup) do |parser|
         end
       rescue error
         puts "\n* #{dev_path} (#{error.message})"
+        if backtrace = error.backtrace
+          puts backtrace.join("\n")
+        end
       end
     end
   end
