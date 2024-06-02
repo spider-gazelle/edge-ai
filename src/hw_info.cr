@@ -181,6 +181,10 @@ parse = OptionParser.parse(ARGV.dup) do |parser|
                     str << "fps)"
                   else
                     str << "\n    "
+                    size.min_width.to_s(str)
+                    str << "x"
+                    size.min_height.to_s(str)
+                    str << " => "
                     size.max_width.to_s(str)
                     str << "x"
                     size.max_height.to_s(str)
