@@ -32,6 +32,12 @@ apt update && apt install -y \
     libusb-1.0-0-dev \
     plocate \
     docker-buildx-plugin \
+    ffmpeg \
+    libgpiod-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libavutil-dev \
+    libswscale-dev \
     jq
 
 docker buildx install
@@ -66,3 +72,12 @@ docker run --privileged --rm tonistiigi/binfmt --install all
 docker buildx create --name mybuilder --driver docker-container --use
 docker buildx inspect --bootstrap
 docker buildx use mybuilder
+
+echo "========================"
+echo "===Installing Crystal==="
+echo "========================"
+curl -fsSL https://packagecloud.io/84codes/crystal/gpgkey | gpg --dearmor | tee /etc/apt/trusted.gpg.d/84codes_crystal.gpg > /dev/null
+. /etc/os-release
+echo "deb https://packagecloud.io/84codes/crystal/$ID $VERSION_CODENAME main" | tee /etc/apt/sources.list.d/84codes_crystal.list
+apt update
+apt install -y crystal
