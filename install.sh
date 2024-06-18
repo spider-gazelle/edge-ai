@@ -181,6 +181,16 @@ chown 10001:10001 ./detections
 sudo -u "$CURRENT_USER" shards build --production --ignore-crystal-version --skip-postinstall --skip-executables install
 ./bin/install
 
+# Ensure file permissions are correct for the container
+echo "========================================"
+echo "===Configuring Filesystem Permissions==="
+echo "========================================"
+
+chown -R 10001:10001 ./clips
+chown -R 10001:10001 ./config
+chown -R 10001:10001 ./detections
+chown -R 10001:10001 ./model_storage
+
 # reboot as we need the v4l2 loopback paths to be stable
 # they initialize before hardware typically
 reboot

@@ -60,6 +60,10 @@ shards:
     git: https://github.com/spider-gazelle/promise.git
     version: 3.1.0
 
+  simple_retry:
+    git: https://github.com/spider-gazelle/simple_retry.git
+    version: 1.1.1
+
   stumpy_core:
     git: https://github.com/stumpycr/stumpy_core.git
     version: 1.9.1
@@ -78,7 +82,7 @@ shards:
 
   tensorflow_lite:
     git: https://github.com/spider-gazelle/tensorflow_lite.git
-    version: 2.2.0
+    version: 2.2.1
 
   tflite_image:
     git: https://github.com/spider-gazelle/tflite_image.git
@@ -86,9 +90,9 @@ shards:
 
   tflite_pipeline:
     git: https://github.com/spider-gazelle/tflite_pipeline.git
-    version: 1.0.0+git.commit.951963dd9d695a91fe6a486ebd7fb71ec6740653
+    version: 1.0.0+git.commit.fde15ae52fc16457e5b841155c9995f49dcc3079
 
   v4l2:
     git: https://github.com/spider-gazelle/v4l2.cr.git
-    version: 1.0.0+git.commit.3fe378f0c2244349a050d50081d494abe6397a9d
+    version: 1.0.1+git.commit.bd4ab15a9991cd7ed1fc54fede0bd2b3e8e62ca8
 
