@@ -223,6 +223,32 @@ After running the install script you can inspect your hardware using the followi
    * Global Unichip Corp or Google is your Coral.ai TPU
 3. List GPIO lines available: `gpioinfo`
 
+on newer versions of Pi OS's v4l2 no longer works for the ribbon connected camera modules. For these you'll need to stream the video for capture.
+
+1. on the pi: `sudo apt install libcamera-apps`
+1. list devices `libcamera-vid --list-cameras`
+1. stream video `libcamera-vid -t 0 --inline -o - | ffmpeg -i - -c:v copy -f mpegts udp://239.255.255.250:1234?pkt_size=1316`
+
+Then you can use the multicast stream as the input. This should be configured as a service for the docker images to pick it up on boot: `sudo vi /etc/systemd/system/camera-stream.service`
+
+```ini
+[Unit]
+Description=Camera Stream Service
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+Type=simple
+User=<username here>
+ExecStart=/bin/sh -c 'libcamera-vid -t 0 --inline -o - | ffmpeg -i - -c:v copy -f mpegts udp://239.255.255.250:1234?pkt_size=1316'
+Restart=always
+RestartSec=5
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+```
+
 ### Debugging the image
 
 As we are building minimal docker images it is challenging to inspect the contents of the container. The simplest way to achieve this by mounting busy box binaries into the image
