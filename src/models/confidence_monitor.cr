@@ -25,9 +25,9 @@ class ConfidenceMonitor
     input = @config.input
     ip, port = case input
                when Configuration::InputStream
-                 # TODO:: we convert this to mp4 ts for confidence and capture it
-                 stream = input.path
-                 return
+                 # we assume this is in the correct format
+                 stream = URI.parse input.path
+                 {stream.host.as(String), stream.port.as(Int32)}
                when Configuration::InputDevice
                  {input.multicast_ip, input.multicast_port}
                else # streaming not supported
