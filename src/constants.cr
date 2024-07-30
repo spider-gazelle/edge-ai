@@ -26,6 +26,10 @@ module EdgeAI
   PIPELINE_CONFIG = "./config/config.yml"
   PIPELINE_STATUS = "./config/"
 
+  REPLAY_CONFIGURE_RAMDISK = ENV["REPLAY_CONFIGURE_RAMDISK"]? == "true"
+  REPLAY_MOUNT_PATH        = Path[ENV["REPLAY_MOUNT_PATH"]? || "/mnt/ramdisk"]
+  REPLAY_MEM_SIZE          = ENV["REPLAY_MEM_SIZE"]? || "512M"
+
   def self.running_in_production?
     IS_PRODUCTION
   end

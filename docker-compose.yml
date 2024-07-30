@@ -22,10 +22,6 @@ services:
       # the unix pipes for IPC
       - ./detections/:/detections/
 
-      # video recording window
-      # (record to memory so we don't wear out the HD)
-      - /mnt/ramdisk:/mnt/ramdisk
-
       # AI model storage (downloaded based on config)
       - ./model_storage/:/model_storage/
 
@@ -71,6 +67,30 @@ services:
     # Not required when using host network mode
     # ports:
     #  - "3000:3000"
+
+  recorder:
+    image: stakach/edge-ai
+    # build: .
+    restart: always
+
+    # network, host mode as we need multicast support
+    container_name: recorder
+    hostname: recorder
+    network_mode: "host"
+
+    # processor has a custom entry point
+    entrypoint: /recorder
+    command: []
+
+    volumes:
+      - ./config/:/config/
+
+      # video recording window
+      # (record to memory so we don't wear out the HD)
+      - /mnt/ramdisk:/mnt/ramdisk
+
+    environment:
+      SG_ENV: "production"
 
   trigger:
     image: stakach/ai-trigger

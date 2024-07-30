@@ -178,18 +178,18 @@ class EdgeAI::Clips < EdgeAI::Base
     metadata
   end
 
+  alias Config = TensorflowLite::Pipeline::Configuration
+
   protected def video_parts_path
-    replay_mount = TensorflowLite::Pipeline::Coordinator::REPLAY_MOUNT_PATH
+    replay_mount = REPLAY_MOUNT_PATH
 
     input = config.input
     case input
-    in TensorflowLite::Pipeline::Configuration::InputStream
+    in Config::InputStream, Config::InputDevice
       replay_mount / id
-    in TensorflowLite::Pipeline::Configuration::InputDevice
-      replay_mount / Path[input.path].stem
-    in TensorflowLite::Pipeline::Configuration::InputImage
+    in Config::InputImage
       raise "images don't support replays"
-    in TensorflowLite::Pipeline::Configuration::Input
+    in Config::Input
       raise "abstract class matched..."
     end
   end

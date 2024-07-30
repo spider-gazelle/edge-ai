@@ -7,7 +7,7 @@ class EdgeAI::Processor
   alias Pipeline = TensorflowLite::Pipeline::Configuration::Pipeline
 
   def initialize
-    @pipelines = read_config
+    @config = ConfigChange.instance
   end
 
   @shutdown : Bool = false
@@ -16,60 +16,10 @@ class EdgeAI::Processor
   # Configuration management
   # ========================
 
-  @pipelines : Hash(String, Pipeline)
-
-  def read_config : Hash(String, Pipeline)
-    NamedTuple(pipelines: Hash(String, Pipeline)).from_yaml(File.read(PIPELINE_CONFIG))[:pipelines]
-  rescue error
-    Log.warn(exception: error) { "failed to read configuration file, applying default" }
-    {} of String => Pipeline
-  end
-
   def monitor_config
-    monitor = ConfigChange.instance
-    monitor.on_change do |_file_data|
-      begin
-        Log.info { "config update detected" }
-        update_config read_config
-      rescue error
-        Log.warn(exception: error) { "failed to apply configuration change" }
-      end
-    end
-    monitor.watch
-  end
-
-  def update_config(pipelines : Hash(String, Pipeline))
-    new_keys = pipelines.keys
-    old_keys = @pipelines.keys
-
-    # streams that were disabled
-    removed = old_keys - new_keys
-    if removed.size > 0
-      Log.info { "removing #{removed.size} detection streams" }
-      removed.each do |id|
-        stop_process id
-      end
-    end
-
-    # add any new streams
-    added = new_keys - old_keys
-    added.each do |id|
-      start_process id
-    end
-
-    # find any with changes
-    pipelines.each do |id, new_config|
-      if old_config = @pipelines[id]?
-        next if old_config.updated == new_config.updated
-        Log.info { "stream config updated: #{id}" }
-
-        stop_process id
-        sleep 1
-        start_process id
-      end
-    end
-
-    @pipelines = pipelines
+    @config.on_start_pipeline { |id, _pipeline| start_process id }
+    @config.on_stop_pipeline { |id| stop_process id }
+    @config.watch
   end
 
   # ========================
@@ -81,11 +31,9 @@ class EdgeAI::Processor
   # stream_id => process
   @processes : Hash(String, BackgroundTask) = {} of String => BackgroundTask
 
-  def start_processes : Nil
-    @pipelines.each_key { |id| start_process(id) }
-  end
-
   def start_process(id : String) : Nil
+    return if @shutdown
+
     Log.info { "Process starting: #{id}" }
     process_path = Process.executable_path.as(String)
     task = BackgroundTask.new
@@ -127,11 +75,11 @@ class EdgeAI::Processor
   @coordinators : Hash(String, Coordinator) = {} of String => Coordinator
   @signals : Hash(String, DetectionWriter) = {} of String => DetectionWriter
 
-  def start_streams
-    @pipelines.each_key do |id|
-      start_stream id
-    end
-  end
+  # def start_streams
+  #  @config.pipelines.each_key do |id|
+  #    start_stream id
+  #  end
+  # end
 
   def stop_stream(id : String)
     coord = @coordinators.delete id
@@ -159,7 +107,7 @@ class EdgeAI::Processor
   def start_stream(id : String)
     return if @shutdown
 
-    config = @pipelines[id]?
+    config = @config.pipelines[id]?
     return unless config
 
     Log.info { "starting stream: #{id}" }
@@ -230,11 +178,8 @@ class EdgeAI::Processor
   def shutdown
     @shutdown = true
     Log.info { "shutting down!" }
-    @pipelines.each_key do |id|
-      stop_stream id
-    end
-
-    @processes.keys.each { |id| stop_process(id) }
+    @config.pipelines.each_key { |id| stop_stream id }
+    @processes.each_key { |id| stop_process(id) }
   end
 end
 
@@ -261,7 +206,6 @@ else # this is the management process
 
   # start child processes
   processor = EdgeAI::Processor.new
-  processor.start_processes
   processor.monitor_config
 end
 

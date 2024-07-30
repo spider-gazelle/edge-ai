@@ -38,6 +38,9 @@ targets:
   processor:
     main: src/processor.cr
 
+  recorder:
+    main: src/replay_recorder.cr
+
   hw_info:
     main: src/hw_info.cr
 

@@ -18,7 +18,7 @@ shards:
 
   ffmpeg:
     git: https://github.com/spider-gazelle/ffmpeg.git
-    version: 1.3.0+git.commit.bf2fabbb0c83e3bcd9fa82efa3ad9278645c2d0b
+    version: 1.3.1+git.commit.a026cd65394b2340269162269e8cc40e6fa5ef92
 
   future:
     git: https://github.com/crystal-community/future.cr.git
@@ -90,7 +90,7 @@ shards:
 
   tflite_pipeline:
     git: https://github.com/spider-gazelle/tflite_pipeline.git
-    version: 1.0.0+git.commit.61ef655452b6b8788ae4bf455b720550864b723c
+    version: 1.0.0+git.commit.83e640f836f577548be738e469f7ddee430f35bf
 
   v4l2:
     git: https://github.com/spider-gazelle/v4l2.cr.git
