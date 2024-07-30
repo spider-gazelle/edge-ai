@@ -1,5 +1,5 @@
 FROM stakach/tensorflowlite:latest as tflite
-FROM 84codes/crystal:latest-debian-12 as build
+FROM 84codes/crystal:latest-ubuntu-24.04 as build
 WORKDIR /app
 
 # Create a non-privileged user, defaults are appuser:10001

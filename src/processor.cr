@@ -91,6 +91,23 @@ class EdgeAI::Processor
     task = BackgroundTask.new
     task.run process_path, "-s", id
     @processes[id] = task
+
+    # restart the container if there was a crash
+    # only way to ensure child ffmpeg processes are not left dangling
+    #
+    # TODO:: once clip recorder is in place, restart just the process
+    # if it using an external stream
+    # We could probably refactor so clip recorder does all the work
+    # * external stream => save recordings
+    # * hardware => dummy => stream => recordings
+    # then in both cases we can restart just the child process
+    spawn do
+      task.on_exit.receive?
+      task_running = @processes[id]?
+      if !@shutdown && task_running && task_running.on_exit.closed?
+        exit(-1)
+      end
+    end
   end
 
   def stop_process(id : String) : Nil
