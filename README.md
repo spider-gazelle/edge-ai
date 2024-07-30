@@ -227,7 +227,7 @@ on newer versions of Pi OS's v4l2 no longer works for the ribbon connected camer
 
 1. on the pi: `sudo apt install libcamera-apps`
 1. list devices `libcamera-vid --list-cameras`
-1. stream video `libcamera-vid -t 0 --inline -o - | ffmpeg -i - -c:v copy -f mpegts udp://239.255.255.250:1234?pkt_size=1316`
+1. stream video `libcamera-vid -t 0 --autofocus-mode auto --hdr sensor --profile main --level 4.2 --inline -o - | ffmpeg -i - -c:v copy -tune zerolatency -f mpegts udp://239.255.255.250:1234?pkt_size=1316`
 
 Then you can use the multicast stream as the input. This should be configured as a service for the docker images to pick it up on boot: `sudo vi /etc/systemd/system/camera-stream.service`
 
@@ -240,7 +240,7 @@ After=syslog.target network-online.target
 [Service]
 Type=simple
 User=<username here>
-ExecStart=/bin/sh -c 'libcamera-vid -t 0 --inline -o - | ffmpeg -i - -c:v copy -f mpegts udp://239.255.255.250:1234?pkt_size=1316'
+ExecStart=/bin/sh -c 'libcamera-vid -t 0 --autofocus-mode auto --hdr sensor --profile main --level 4.2 --inline -o - | ffmpeg -i - -c:v copy -tune zerolatency -f mpegts udp://239.255.255.250:1234?pkt_size=1316'
 Restart=always
 RestartSec=5
 KillMode=mixed

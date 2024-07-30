@@ -59,7 +59,22 @@
       player = mpegts.createPlayer({
         type: 'mpegts',  // could also be mse, m2ts, flv
         isLive: true,
-        url: streamURL
+        url: streamURL,
+        hasAudio: false
+      }, {
+        enableWorker: true,
+        enableWorkerForMSE: true,
+        enableStashBuffer: false,
+        stashInitialSize: 1024 * 1024,
+        isLive: true,
+        liveBufferLatencyChasing: true,
+        liveBufferLatencyChasingOnPaused: true,
+        liveSync: true,
+        autoCleanupSourceBuffer: true,
+        fixAudioTimestampGap: false,
+        lazyLoad: false,
+        liveSyncMaxLatency: 0.8,
+        liveSyncTargetLatency: 0.3
       });
       player.attachMediaElement(videoElement);
       player.load();

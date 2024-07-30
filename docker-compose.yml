@@ -72,6 +72,27 @@ services:
     # ports:
     #  - "3000:3000"
 
+  trigger:
+    image: stakach/ai-trigger
+    restart: always
+
+    # network
+    container_name: trigger
+    hostname: trigger
+    network_mode: "host"
+
+    # required to open GPIO chips
+    devices:
+      - "/dev/gpiochip0:/dev/gpiochip0"
+
+    # required to trigger GPIO lines
+    cap_add:
+      - SYS_RAWIO
+
+    # Not required when using host network mode
+    # ports:
+    #  - "3001:3001"
+
   frontend:
     image: nginx
     restart: always
