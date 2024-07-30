@@ -51,6 +51,8 @@ class EdgeAI::ConfigChange
   def new_config
     @mutex.synchronize do
       pipelines = read_config
+      # ensure old pipelines are configured
+      @pipelines ||= {} of String => Pipeline
       apply_changes pipelines
     end
   rescue error
