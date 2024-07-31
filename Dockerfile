@@ -66,7 +66,7 @@ RUN cp /usr/local/lib/libtensorflowlite_gpu_delegate.so /app/bin/libtensorflowli
 
 # Build application
 COPY ./src /app/src
-RUN shards build --production --error-trace -Dpreview_mt -O1
+RUN shards build --debug --error-trace -Dpreview_mt -O1
 
 # Extract binary dependencies (uncomment if not compiling a static build)
 RUN for binary in "/usr/bin/ffmpeg" /app/bin/*; do \

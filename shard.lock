@@ -90,7 +90,7 @@ shards:
 
   tflite_pipeline:
     git: https://github.com/spider-gazelle/tflite_pipeline.git
-    version: 1.0.0+git.commit.83e640f836f577548be738e469f7ddee430f35bf
+    version: 1.0.0+git.commit.dcb436fcaa60058e3bd8f8f9159a6f6d67574f7c
 
   v4l2:
     git: https://github.com/spider-gazelle/v4l2.cr.git

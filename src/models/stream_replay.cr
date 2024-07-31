@@ -25,7 +25,7 @@ class EdgeAI::StreamReplay
       "ffmpeg",
       "-i", stream,
       "-c", "copy", "-copyinkf", "-an", "-map", "0", "-f",
-      "segment", "-segment_time", "2",
+      "segment", "-segment_time", "2", "-loglevel", "warning",
       "-reset_timestamps", "1", "-strftime", "1", filenames
     )
 
