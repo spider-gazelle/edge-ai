@@ -94,7 +94,7 @@ class EdgeAI::Monitor < EdgeAI::Base
 
   # pushes detections found in the first video stream in realtime to connected sockets
   @[AC::Route::WebSocket("/detections")]
-  def detect(socket)
+  def detect_default(socket)
     id = Configuration::PIPELINES.keys.first
     DETECT_MUTEX.synchronize { DETECT_SOCKETS[id] << socket }
 
