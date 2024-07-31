@@ -33,6 +33,19 @@ services:
     # the simplest way to support a wide range of hardware
     privileged: true
 
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+        reservations:
+          cpus: '1'
+    cpuset: "0"  # Pin the container to CPU core 0
+
+    # on a pi logging slows the system down too much
+    # really need to move all logging into memory
+    logging:
+      driver: "none"
+
     environment:
       SG_ENV: "production"
 
@@ -68,6 +81,9 @@ services:
     # ports:
     #  - "3000:3000"
 
+    logging:
+      driver: "none"
+
   recorder:
     image: stakach/edge-ai
     # build: .
@@ -89,8 +105,8 @@ services:
       # (record to memory so we don't wear out the HD)
       - /mnt/ramdisk:/mnt/ramdisk
 
-    environment:
-      SG_ENV: "production"
+    logging:
+      driver: "none"
 
   trigger:
     image: stakach/ai-trigger
@@ -113,6 +129,9 @@ services:
     # ports:
     #  - "3001:3001"
 
+    logging:
+      driver: "none"
+
   frontend:
     image: nginx
     restart: always
@@ -126,6 +145,9 @@ services:
     volumes:
       - ./www/:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+    logging:
+      driver: "none"
 
     # Not required when using host network mode
     # ports:
