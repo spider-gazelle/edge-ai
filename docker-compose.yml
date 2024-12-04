@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # The Edge AI service
   # run: `docker-compose build` to update the service
@@ -44,16 +46,7 @@ services:
     tmpfs:
       - /var/log
 
-    # on a pi logging slows the system down too much
-    # all logging is performed on memory
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-    #debug
-    # driver: "json-file"
+    logging: ${ENABLE_LOGGING}
 
     environment:
       SG_ENV: "production"
@@ -92,21 +85,17 @@ services:
     tmpfs:
       - /var/log
 
-    # Not required when using host network mode
-    # ports:
-    #  - "3000:3000"
-
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: ${ENABLE_LOGGING}
 
     environment:
       SG_ENV: "production"
 
+    # Not required when using host network mode
+    # ports:
+    #  - "3000:3000"
+
   recorder:
-    image: miew354/edge-ai
+    image: stakach/edge-ai
     # build: .
     restart: always
 
@@ -129,11 +118,7 @@ services:
     tmpfs:
       - /var/log
 
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: ${ENABLE_LOGGING}
 
   trigger:
     image: stakach/ai-trigger
@@ -159,11 +144,7 @@ services:
     # ports:
     #  - "3001:3001"
 
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: ${ENABLE_LOGGING}
 
   frontend:
     image: nginx
@@ -182,19 +163,24 @@ services:
     tmpfs:
       - /var/log
 
-    logging:
-
-      #default config
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-      # use for server debug
-      #driver: "json-file"
+    logging: ${ENABLE_LOGGING}
+    command: /bin/sh -c "mkdir -p /var/log/nginx && nginx -g 'daemon off;'"
 
     # Not required when using host network mode
     # ports:
     #   - 5000:80
     # extra_hosts:
     #   - "host.docker.internal:host-gateway"
+
+# Define the logging config
+x-logging-enabled: &logging-enabled
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "3"
+
+x-logging-disabled: &logging-disabled
+  driver: "none"
+
+# Logging disabled by default 
+logging: &logging ${ENABLE_LOGGING:-*logging-disabled}
