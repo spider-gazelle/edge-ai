@@ -41,10 +41,16 @@ services:
           cpus: '1'
     cpuset: "0"  # Pin the container to CPU core 0
 
+    tmpfs:
+      - /var/log
+
     # on a pi logging slows the system down too much
-    # really need to move all logging into memory
+    # all logging is performed on memory
     logging:
-      driver: "none"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
     #debug
     # driver: "json-file"
@@ -61,6 +67,9 @@ services:
     container_name: interface
     hostname: interface
     network_mode: "host"
+
+    entrypoint: /interface
+    command: []
 
     volumes:
       - ./clips/:/clips/
@@ -80,12 +89,21 @@ services:
     cap_add:
       - SYS_RAWIO
 
+    tmpfs:
+      - /var/log
+
     # Not required when using host network mode
     # ports:
     #  - "3000:3000"
 
     logging:
-      driver: "none"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    environment:
+      SG_ENV: "production"
 
   recorder:
     image: miew354/edge-ai
@@ -108,8 +126,14 @@ services:
       # (record to memory so we don't wear out the HD)
       - /mnt/ramdisk:/mnt/ramdisk
 
+    tmpfs:
+      - /var/log
+
     logging:
-      driver: "none"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   trigger:
     image: stakach/ai-trigger
@@ -128,12 +152,18 @@ services:
     cap_add:
       - SYS_RAWIO
 
+    tmpfs:
+      - /var/log
+
     # Not required when using host network mode
     # ports:
     #  - "3001:3001"
 
     logging:
-      driver: "none"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     image: nginx
@@ -149,10 +179,16 @@ services:
       - ./www/:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
 
+    tmpfs:
+      - /var/log
+
     logging:
 
       #default config
-      driver: "none"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
       # use for server debug
       #driver: "json-file"
