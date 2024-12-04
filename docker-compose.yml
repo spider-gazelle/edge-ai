@@ -3,7 +3,7 @@ services:
   # run: `docker-compose build` to update the service
   # run: `docker-compose up -d` to launch the service
   processor:
-    image: stakach/edge-ai
+    image: miew354/edge-ai
     # build: .
     restart: always
     
@@ -53,7 +53,7 @@ services:
       SG_ENV: "production"
 
   interface:
-    image: stakach/edge-ai
+    image: miew354/edge-ai
     # build: .
     restart: always
 
@@ -88,7 +88,7 @@ services:
       driver: "none"
 
   recorder:
-    image: stakach/edge-ai
+    image: miew354/edge-ai
     # build: .
     restart: always
 
