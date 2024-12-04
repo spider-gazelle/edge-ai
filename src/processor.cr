@@ -112,14 +112,16 @@ class EdgeAI::Processor
 
     Log.info { "starting stream: #{id}" }
 
-    coord = Coordinator.new(id, config)
-    signal = DetectionWriter.new(id)
+    coord = Coordinator.new(id, config)  # Initialize Coordinator
+    signal = DetectionWriter.new(id)     # Initialize DetectionWriter
 
     @coordinators[id] = coord
     @signals[id] = signal
 
+    # Handle output from the Coordinator
     coord.on_output do |_, detections, stats|
       processing_time = stats.average_milliseconds
+      # Send detection data and statistics as JSON to the DetectionWriter
       signal.send({
         fps:        stats.fps(processing_time),
         avg_time:   processing_time,

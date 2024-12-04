@@ -82,7 +82,6 @@ class EdgeAI::Monitor < EdgeAI::Base
   @[AC::Route::WebSocket("/:id/detections")]
   def detect(socket)
     DETECT_MUTEX.synchronize { DETECT_SOCKETS[id] << socket }
-
     socket.on_close do
       DETECT_MUTEX.synchronize do
         sockets = DETECT_SOCKETS[id]
