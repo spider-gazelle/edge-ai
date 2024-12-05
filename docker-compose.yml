@@ -1,4 +1,11 @@
-version: '3.8'
+
+# Logging Configs
+x-logging: &logging
+  logging:
+    driver: "${LOGGING_DRIVER:-none}"  # Defaults to none if not set
+    options:
+      max-size: "5m"
+      max-file: "3"
 
 services:
   # The Edge AI service
@@ -6,7 +13,6 @@ services:
   # run: `docker-compose up -d` to launch the service
   processor:
     image: miew354/edge-ai
-    # build: .
     restart: always
     
     # network, host mode as we need multicast support
@@ -46,7 +52,7 @@ services:
     tmpfs:
       - /var/log
 
-    logging: ${ENABLE_LOGGING}
+    <<: *logging
 
     environment:
       SG_ENV: "production"
@@ -85,7 +91,7 @@ services:
     tmpfs:
       - /var/log
 
-    logging: ${ENABLE_LOGGING}
+    <<: *logging
 
     environment:
       SG_ENV: "production"
@@ -118,7 +124,7 @@ services:
     tmpfs:
       - /var/log
 
-    logging: ${ENABLE_LOGGING}
+    <<: *logging
 
   trigger:
     image: stakach/ai-trigger
@@ -144,7 +150,7 @@ services:
     # ports:
     #  - "3001:3001"
 
-    logging: ${ENABLE_LOGGING}
+    <<: *logging
 
   frontend:
     image: nginx
@@ -161,26 +167,12 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
 
     tmpfs:
-      - /var/log
+      - /var/log/nginx
 
-    logging: ${ENABLE_LOGGING}
-    command: /bin/sh -c "mkdir -p /var/log/nginx && nginx -g 'daemon off;'"
+    <<: *logging
 
     # Not required when using host network mode
     # ports:
     #   - 5000:80
     # extra_hosts:
     #   - "host.docker.internal:host-gateway"
-
-# Define the logging config
-x-logging-enabled: &logging-enabled
-  driver: "json-file"
-  options:
-    max-size: "5m"
-    max-file: "3"
-
-x-logging-disabled: &logging-disabled
-  driver: "none"
-
-# Logging disabled by default 
-logging: &logging ${ENABLE_LOGGING:-*logging-disabled}
