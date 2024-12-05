@@ -208,6 +208,17 @@
     // Create a WebSocket connection
     const detectionsURL = window.location.origin.replace('http', 'ws') + '/api/edge/ai/monitor/' + id_value + '/detections';
     const ws = new WebSocket(detectionsURL);
+    
+    ws.addEventListener('open', function (event) {
+      console.log('WS Established...');
+    });
+    ws.addEventListener('message', function (event) {
+      console.log('detections ', event.data);
+    });
+    ws.addEventListener('close', function (event) {
+      console.log('WS Lost...');
+    });
+    
     // Listen for messages from the server
     ws.onmessage = function(event) {
       // Parse the JSON data

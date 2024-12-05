@@ -23,12 +23,28 @@
     a:hover {
       text-decoration: underline;
     }
+    input {
+      margin: 20px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
   <h1>Welcome to Edge AI Dashboard</h1>
-  <p>Select a page to view:</p>
-  <a href="monitor.html">Monitor</a>
-  <a href="detector_debug.html">Detector Debug</a>
+  <p>Enter the ID for the monitor:</p>
+  <input type="text" id="monitorId" placeholder="Enter ID">
+  <a href="#" id="monitorLink">Monitor</a>
+  <a href="#" id="detectorDebugLink">Detector Debug</a>
+
+  <script>
+    document.getElementById('monitorId').addEventListener('input', function() {
+      const id = this.value;
+      const monitorLink = document.getElementById('monitorLink');
+      const detectorDebugLink = document.getElementById('detectorDebugLink');
+      monitorLink.href = `monitor.html?id=${encodeURIComponent(id)}`;
+      detectorDebugLink.href = `detector_debug.html?id=${encodeURIComponent(id)}`;
+    });
+  </script>
 </body>
 </html>
